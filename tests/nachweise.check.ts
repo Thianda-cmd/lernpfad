@@ -42,13 +42,16 @@ for (const nw of NACHWEISE) {
   const eqs = [...nw.eq, ...(nw.notes ?? []).flatMap((x) => (x.eq ? [x.eq] : []))]
   for (const e of eqs) {
     if (/\*|Licht/.test(e)) continue // Flammenfärbung: keine Stoffgleichung
-    const [l, r] = e.split(' → ')
+    // auch Ketten wie „A → B → C“: jedes Paar muss aufgehen
+    const parts = e.split(' → ')
     try {
-      const L = side(l)
-      const R = side(r)
-      const els = new Set([...L.atoms.keys(), ...R.atoms.keys()])
-      for (const el of els) if ((L.atoms.get(el) ?? 0) !== (R.atoms.get(el) ?? 0)) errs.push(`${nw.id}: ${el} ${L.atoms.get(el) ?? 0} ≠ ${R.atoms.get(el) ?? 0}  ::  ${e}`)
-      if (L.charge !== R.charge) errs.push(`${nw.id}: Ladung ${L.charge} ≠ ${R.charge}  ::  ${e}`)
+      for (let k = 0; k + 1 < parts.length; k++) {
+        const L = side(parts[k])
+        const R = side(parts[k + 1])
+        const els = new Set([...L.atoms.keys(), ...R.atoms.keys()])
+        for (const el of els) if ((L.atoms.get(el) ?? 0) !== (R.atoms.get(el) ?? 0)) errs.push(`${nw.id}: ${el} ${L.atoms.get(el) ?? 0} ≠ ${R.atoms.get(el) ?? 0}  ::  ${e}`)
+        if (L.charge !== R.charge) errs.push(`${nw.id}: Ladung ${L.charge} ≠ ${R.charge}  ::  ${e}`)
+      }
       checked++
     } catch (x) {
       errs.push(`${nw.id}: ${(x as Error).message}  ::  ${e}`)

@@ -76,16 +76,48 @@ function Player({ phases, kind }: { phases: Phase[]; kind: 'mitose' | 'meiose' }
     setTarget(Math.round(v))
   }
 
+  // Phasen nach Abschnitt gruppieren (Interphase · Meiose I · Meiose II …)
+  const groups: { name: string; idx: number[] }[] = []
+  phases.forEach((p, k) => {
+    const g = groups[groups.length - 1]
+    if (g && g.name === p.group) g.idx.push(k)
+    else groups.push({ name: p.group, idx: [k] })
+  })
+  const cpc = parseInt(c.cpc, 10)
+
   return (
     <div className="zt-player">
       <section className="zt-stage card">
-        <DivisionSvg phases={phases} t={t} />
+        <header className="zt-stage__head">
+          <div>
+            <span className="zt-stage__group">{ph.group}</span>
+            <strong key={ph.id}>{ph.name}</strong>
+          </div>
+          <div className="zt-legend">
+            <span>
+              <i className="is-m" /> von der Mutter
+            </span>
+            <span>
+              <i className="is-p" /> vom Vater
+            </span>
+          </div>
+        </header>
+        <div className="zt-canvas">
+          <DivisionSvg phases={phases} t={t} />
+        </div>
         <div className="zt-timeline" role="tablist" aria-label="Phasen">
-          {phases.map((p, k) => (
-            <button key={p.id} type="button" role="tab" aria-selected={k === cur} className={`zt-tl ${k === cur ? 'is-on' : ''} ${k < cur ? 'is-done' : ''}`} onClick={() => setTarget(k)}>
-              <span className="zt-tl__dot" />
-              <span className="zt-tl__name">{p.name}</span>
-            </button>
+          {groups.map((g) => (
+            <div key={g.name + g.idx[0]} className={`zt-tg ${g.idx.includes(cur) ? 'is-on' : ''}`} style={{ flexGrow: g.idx.length }}>
+              <span className="zt-tg__name">{g.name}</span>
+              <div className="zt-tg__items">
+                {g.idx.map((k) => (
+                  <button key={phases[k].id} type="button" role="tab" aria-selected={k === cur} className={`zt-tl ${k === cur ? 'is-on' : ''} ${k < cur ? 'is-done' : ''}`} onClick={() => setTarget(k)}>
+                    <span className="zt-tl__dot" />
+                    <span className="zt-tl__name">{phases[k].name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
         <div className="zt-ctrl">
@@ -106,21 +138,58 @@ function Player({ phases, kind }: { phases: Phase[]; kind: 'mitose' | 'meiose' }
             Weiter
           </button>
           <input className="zt-range" type="range" min={0} max={last} step={0.01} value={t} onChange={(e) => scrub(parseFloat(e.target.value))} aria-label="Zeitleiste" />
+          <span className="zt-keys" aria-hidden="true">
+            <kbd>←</kbd>
+            <kbd>→</kbd>
+          </span>
         </div>
       </section>
 
       <aside className="zt-info card">
         <p className="zt-info__step">
-          {kind === 'mitose' ? 'Mitose' : ph.id.endsWith('2') || ph.id === 'ergebnis' ? 'Meiose II' : ph.id === 'interphase' ? 'vor der Meiose' : 'Meiose I'} · {cur + 1}/{phases.length}
+          {kind === 'mitose' ? 'Mitose' : 'Meiose'} · Phase {cur + 1} von {phases.length}
         </p>
         <h2 key={ph.id} className="zt-info__name">
           {ph.name}
         </h2>
-        <ul key={ph.id + 'p'} className="zt-points">
+        <ol key={ph.id + 'p'} className="zt-points">
           {ph.points.map((x) => (
             <li key={x}>{x}</li>
           ))}
-        </ul>
+        </ol>
+
+        <div className="zt-meter">
+          <div className="zt-meter__row">
+            <span>Chromosomen je Zelle</span>
+            <b>{c.chr}</b>
+            <small>Mensch {human(c.chr)}</small>
+          </div>
+          <div className="zt-glyphs" aria-hidden="true">
+            {Array.from({ length: c.chr }, (_, k) => (
+              <svg key={k} viewBox="0 0 12 20">
+                {cpc === 2 ? (
+                  <>
+                    <path d="M3.5 2 L8.5 18" />
+                    <path d="M8.5 2 L3.5 18" />
+                  </>
+                ) : (
+                  <path d="M6 2 L6 18" />
+                )}
+              </svg>
+            ))}
+          </div>
+          <div className="zt-meter__row">
+            <span>DNA-Gehalt</span>
+            <b>{c.dna}</b>
+          </div>
+          <div className="zt-dna" aria-hidden="true">
+            {[1, 2, 3, 4].map((k) => (
+              <i key={k} className={k <= c.C ? 'is-on' : ''} />
+            ))}
+            <span>{c.C}C je Kern</span>
+          </div>
+        </div>
+
         <dl className="zt-counts">
           <div>
             <dt>Zellen</dt>
@@ -130,30 +199,12 @@ function Player({ phases, kind }: { phases: Phase[]; kind: 'mitose' | 'meiose' }
             <dt>Chromosomensatz</dt>
             <dd>{c.set}</dd>
           </div>
-          <div>
-            <dt>Chromosomen je Zelle</dt>
-            <dd>
-              {c.chr} <small>Mensch: {human(c.chr)}</small>
-            </dd>
-          </div>
-          <div>
+          <div className="zt-counts__wide">
             <dt>Chromatiden je Chromosom</dt>
             <dd>{c.cpc}</dd>
           </div>
-          <div className="zt-counts__wide">
-            <dt>DNA-Gehalt</dt>
-            <dd>{c.dna}</dd>
-          </div>
         </dl>
-        <div className="zt-legend">
-          <span>
-            <i className="is-m" /> von der Mutter
-          </span>
-          <span>
-            <i className="is-p" /> vom Vater
-          </span>
-          <span className="zt-legend__model">Modellzelle 2n = 4</span>
-        </div>
+        <p className="zt-model">Modellzelle mit 2n = 4 Chromosomen · Mensch: 2n = 46</p>
       </aside>
     </div>
   )

@@ -13,7 +13,8 @@ export type Pole = { x: number; y: number; op: number }
 export type Line = { x1: number; y1: number; x2: number; y2: number; op: number }
 /** Chromatide: Zentromer (x, y), Arm-Winkel a1/a2, Größe s, Deckkraft op, Spindelpol */
 export type Cht = { x: number; y: number; a1: number; a2: number; op: number; s: number; pole: number }
-export type Label = { x: number; y: number; t: string; anchor?: 'start' | 'middle' | 'end' }
+/** Beschriftung; px/py = Punkt, auf den eine Hinweislinie zeigt; chiasma = Index des Chiasmas */
+export type Label = { x: number; y: number; t: string; anchor?: 'start' | 'middle' | 'end'; px?: number; py?: number; chiasma?: number }
 
 export interface Frame {
   cells: Ell[]
@@ -35,11 +36,14 @@ export interface Counts {
   chr: number
   cpc: string
   dna: string
+  /** DNA-Gehalt je Kern als Zahl (für die Anzeige) */
+  C: number
 }
 
 export interface Phase {
   id: string
   name: string
+  group: string
   points: string[]
   counts: Counts
   frame: Frame
@@ -133,8 +137,9 @@ export const MITOSE: Phase[] = [
   {
     id: 'interphase',
     name: 'Interphase',
+    group: 'Interphase',
     points: ['Chromosomen liegen entspiralisiert als Chromatin im Zellkern.', 'In der S-Phase wird die DNA verdoppelt – danach hat jedes Chromosom zwei Chromatiden.', 'Das Zentrosom verdoppelt sich.'],
-    counts: { cells: '1', set: '2n', chr: 4, cpc: '2 (nach der S-Phase)', dna: '4C' },
+    counts: { cells: '1', set: '2n', chr: 4, cpc: '2 (nach der S-Phase)', dna: '4C', C: 4 },
     frame: {
       cells: [ONE, ONE],
       nuclei: [{ cx: W, cy: H, r: 64, op: 1 }, { cx: W, cy: H, r: 64, op: 0 }],
@@ -144,14 +149,15 @@ export const MITOSE: Phase[] = [
       chromatin: 1,
       fiber: 0,
       swap: false,
-      labels: [{ x: 290, y: 104, t: 'Zellkern mit Chromatin', anchor: 'start' }, { x: 250, y: 62, t: 'Zentrosomen', anchor: 'start' }],
+      labels: [{ x: 300, y: 100, t: 'Zellkern mit Chromatin', anchor: 'start', px: 270, py: 118 }, { x: 300, y: 196, t: 'Kernkörperchen', anchor: 'start', px: 240, py: 138 }, { x: 264, y: 50, t: 'Zentrosomen', anchor: 'start', px: 238, py: 66 }],
     },
   },
   {
     id: 'prophase',
     name: 'Prophase',
+    group: 'Mitose',
     points: ['Chromosomen spiralisieren sich und werden sichtbar – je zwei Schwesterchromatiden am Zentromer.', 'Die Zentrosomen wandern zu den Polen, der Spindelapparat entsteht.', 'Kernhülle und Kernkörperchen lösen sich auf.'],
-    counts: { cells: '1', set: '2n', chr: 4, cpc: '2', dna: '4C' },
+    counts: { cells: '1', set: '2n', chr: 4, cpc: '2', dna: '4C', C: 4 },
     frame: {
       cells: [ONE, ONE],
       nuclei: [{ cx: W, cy: H, r: 66, op: 0.45 }, { cx: W, cy: H, r: 66, op: 0 }],
@@ -161,14 +167,15 @@ export const MITOSE: Phase[] = [
       chromatin: 0.15,
       fiber: 0.25,
       swap: false,
-      labels: [{ x: 300, y: 196, t: 'Kernhülle zerfällt', anchor: 'start' }],
+      labels: [{ x: 304, y: 222, t: 'Kernhülle zerfällt', anchor: 'start', px: 270, py: 196 }, { x: 128, y: 50, t: 'Spindelapparat entsteht', px: 128, py: 64 }],
     },
   },
   {
     id: 'metaphase',
     name: 'Metaphase',
+    group: 'Mitose',
     points: ['Spindelfasern setzen an den Zentromeren an.', 'Alle Chromosomen liegen in der Äquatorialebene.', 'Die Chromosomen sind am stärksten verdichtet.'],
-    counts: { cells: '1', set: '2n', chr: 4, cpc: '2', dna: '4C' },
+    counts: { cells: '1', set: '2n', chr: 4, cpc: '2', dna: '4C', C: 4 },
     frame: {
       cells: [ONE, ONE],
       nuclei: [{ cx: W, cy: H, r: 70, op: 0 }, { cx: W, cy: H, r: 70, op: 0 }],
@@ -178,14 +185,15 @@ export const MITOSE: Phase[] = [
       chromatin: 0,
       fiber: 1,
       swap: false,
-      labels: [{ x: W, y: 30, t: 'Äquatorialebene' }, { x: 70, y: 128, t: 'Spindelpol' }, { x: 132, y: 96, t: 'Spindelfaser', anchor: 'middle' }],
+      labels: [{ x: W, y: 24, t: 'Äquatorialebene', px: W, py: 40 }, { x: 70, y: 118, t: 'Spindelpol', px: 70, py: 133 }, { x: 122, y: 84, t: 'Spindelfaser', px: 150, py: 111 }, { x: 270, y: 56, t: 'Zentromer', anchor: 'start', px: 225, py: 79 }],
     },
   },
   {
     id: 'anaphase',
     name: 'Anaphase',
+    group: 'Mitose',
     points: ['Die Schwesterchromatiden werden am Zentromer getrennt.', 'Die Spindelfasern verkürzen sich und ziehen je eine Chromatide zu jedem Pol.', 'Ab jetzt zählt jede Chromatide als eigenes Chromosom.'],
-    counts: { cells: '1', set: '2 × 2n', chr: 8, cpc: '1', dna: '4C' },
+    counts: { cells: '1', set: '2 × 2n', chr: 8, cpc: '1', dna: '4C', C: 4 },
     frame: {
       cells: [{ cx: W, cy: H, rx: 184, ry: 108 }, { cx: W, cy: H, rx: 184, ry: 108 }],
       nuclei: [{ cx: W, cy: H, r: 70, op: 0 }, { cx: W, cy: H, r: 70, op: 0 }],
@@ -200,8 +208,9 @@ export const MITOSE: Phase[] = [
   {
     id: 'telophase',
     name: 'Telophase',
+    group: 'Mitose',
     points: ['An jedem Pol liegt ein vollständiger Chromosomensatz.', 'Die Chromosomen entspiralisieren sich, neue Kernhüllen entstehen.', 'Der Spindelapparat wird abgebaut, die Zelle schnürt sich ein.'],
-    counts: { cells: '1 (2 Kerne)', set: '2 × 2n', chr: 8, cpc: '1', dna: '2 × 2C' },
+    counts: { cells: '1 (2 Kerne)', set: '2 × 2n', chr: 8, cpc: '1', dna: '2 × 2C', C: 2 },
     frame: {
       cells: [{ cx: 154, cy: H, rx: 128, ry: 104 }, { cx: 286, cy: H, rx: 128, ry: 104 }],
       nuclei: [{ cx: 108, cy: H, r: 50, op: 0.7 }, { cx: 332, cy: H, r: 50, op: 0.7 }],
@@ -211,14 +220,15 @@ export const MITOSE: Phase[] = [
       chromatin: 0.5,
       fiber: 0.2,
       swap: false,
-      labels: [{ x: W, y: 34, t: 'Teilungsfurche' }],
+      labels: [{ x: W, y: 34, t: 'Teilungsfurche', px: W, py: 58 }, { x: 108, y: 234, t: 'neue Kernhülle', px: 108, py: 201 }],
     },
   },
   {
     id: 'cytokinese',
     name: 'Cytokinese',
+    group: 'Cytokinese',
     points: ['Tierzelle: Die Zellmembran schnürt sich durch (Teilungsfurche).', 'Pflanzenzelle: Eine Zellplatte bildet die neue Zellwand.', 'Ergebnis: zwei genetisch identische Tochterzellen mit 2n.'],
-    counts: { cells: '2', set: '2n', chr: 4, cpc: '1', dna: '2C je Zelle' },
+    counts: { cells: '2', set: '2n', chr: 4, cpc: '1', dna: '2C je Zelle', C: 2 },
     frame: {
       cells: [{ cx: 116, cy: H, rx: 102, ry: 98 }, { cx: 324, cy: H, rx: 102, ry: 98 }],
       nuclei: [{ cx: 116, cy: H, r: 46, op: 1 }, { cx: 324, cy: H, r: 46, op: 1 }],
@@ -297,8 +307,9 @@ export const MEIOSE: Phase[] = [
   {
     id: 'interphase',
     name: 'Interphase',
+    group: 'Interphase',
     points: ['Die DNA wurde in der S-Phase verdoppelt.', 'Jedes Chromosom gibt es zweimal: von der Mutter (grün) und vom Vater (sand) – homologe Chromosomen.'],
-    counts: { cells: '1', set: '2n', chr: 4, cpc: '2 (nach der S-Phase)', dna: '4C' },
+    counts: { cells: '1', set: '2n', chr: 4, cpc: '2 (nach der S-Phase)', dna: '4C', C: 4 },
     frame: {
       cells: ONE4,
       nuclei: nuc4([{ cx: W, cy: H, r: 64, op: 1 }, { cx: W, cy: H, r: 64, op: 0 }, { cx: W, cy: H, r: 64, op: 0 }, { cx: W, cy: H, r: 64, op: 0 }]),
@@ -313,8 +324,9 @@ export const MEIOSE: Phase[] = [
   {
     id: 'prophase1',
     name: 'Prophase I',
+    group: 'Meiose I',
     points: ['Die Chromosomen spiralisieren sich.', 'Homologe Chromosomen legen sich genau aneinander (Paarung): Es entstehen Bivalente (Tetraden) aus vier Chromatiden.', 'Spindelapparat entsteht, die Kernhülle zerfällt.'],
-    counts: { cells: '1', set: '2n', chr: 4, cpc: '2', dna: '4C' },
+    counts: { cells: '1', set: '2n', chr: 4, cpc: '2', dna: '4C', C: 4 },
     frame: {
       cells: ONE4,
       nuclei: nuc4([{ cx: W, cy: H, r: 68, op: 0.45 }, { cx: W, cy: H, r: 68, op: 0 }, { cx: W, cy: H, r: 68, op: 0 }, { cx: W, cy: H, r: 68, op: 0 }]),
@@ -324,14 +336,15 @@ export const MEIOSE: Phase[] = [
       chromatin: 0.15,
       fiber: 0.2,
       swap: false,
-      labels: [{ x: 304, y: 226, t: 'Bivalent (Tetrade)', anchor: 'start' }],
+      labels: [{ x: 304, y: 230, t: 'Bivalent (Tetrade)', anchor: 'start', px: 272, py: 196 }],
     },
   },
   {
     id: 'crossing-over',
     name: 'Crossing-over',
+    group: 'Meiose I',
     points: ['Nicht-Schwesterchromatiden überkreuzen sich an Chiasmata.', 'Dabei werden Abschnitte ausgetauscht – neue Allelkombinationen auf einem Chromosom.'],
-    counts: { cells: '1', set: '2n', chr: 4, cpc: '2', dna: '4C' },
+    counts: { cells: '1', set: '2n', chr: 4, cpc: '2', dna: '4C', C: 4 },
     frame: {
       cells: ONE4,
       nuclei: nuc4([{ cx: W, cy: H, r: 68, op: 0.3 }, { cx: W, cy: H, r: 68, op: 0 }, { cx: W, cy: H, r: 68, op: 0 }, { cx: W, cy: H, r: 68, op: 0 }]),
@@ -342,14 +355,15 @@ export const MEIOSE: Phase[] = [
       fiber: 0.3,
       swap: true,
       chiasma: true,
-      labels: [{ x: 304, y: 226, t: 'Chiasma (Überkreuzung)', anchor: 'start' }],
+      labels: [{ x: 304, y: 230, t: 'Chiasma', anchor: 'start', chiasma: 1 }, { x: 120, y: 66, t: 'Chiasma', anchor: 'middle', chiasma: 0 }],
     },
   },
   {
     id: 'metaphase1',
     name: 'Metaphase I',
+    group: 'Meiose I',
     points: ['Die homologen Paare liegen in der Äquatorialebene.', 'Welches Chromosom eines Paars zu welchem Pol zeigt, ist Zufall – hier liegt A mütterlich links, B väterlich links.'],
-    counts: { cells: '1', set: '2n', chr: 4, cpc: '2', dna: '4C' },
+    counts: { cells: '1', set: '2n', chr: 4, cpc: '2', dna: '4C', C: 4 },
     frame: {
       cells: ONE4,
       nuclei: nuc4([{ cx: W, cy: H, r: 70, op: 0 }, { cx: W, cy: H, r: 70, op: 0 }, { cx: W, cy: H, r: 70, op: 0 }, { cx: W, cy: H, r: 70, op: 0 }]),
@@ -359,14 +373,15 @@ export const MEIOSE: Phase[] = [
       chromatin: 0,
       fiber: 1,
       swap: true,
-      labels: [{ x: W, y: 30, t: 'Äquatorialebene' }],
+      labels: [{ x: W, y: 24, t: 'Äquatorialebene', px: W, py: 40 }, { x: 292, y: 60, t: 'homologes Paar', anchor: 'start', px: 238, py: 84 }],
     },
   },
   {
     id: 'anaphase1',
     name: 'Anaphase I',
+    group: 'Meiose I',
     points: ['Die homologen Chromosomen werden getrennt – nicht die Chromatiden.', 'Jedes Chromosom besteht weiter aus zwei Chromatiden.'],
-    counts: { cells: '1', set: '2 × n', chr: 4, cpc: '2', dna: '4C' },
+    counts: { cells: '1', set: '2 × n', chr: 4, cpc: '2', dna: '4C', C: 4 },
     frame: {
       cells: [0, 1, 2, 3].map(() => ({ cx: W, cy: H, rx: 184, ry: 108 })),
       nuclei: nuc4([0, 1, 2, 3].map(() => ({ cx: W, cy: H, r: 70, op: 0 }))),
@@ -381,8 +396,9 @@ export const MEIOSE: Phase[] = [
   {
     id: 'telophase1',
     name: 'Telophase I',
+    group: 'Meiose I',
     points: ['Zwei Zellen mit je einem einfachen Chromosomensatz (n).', 'Reduktionsteilung: Die Chromosomenzahl ist halbiert, jedes Chromosom hat noch zwei Chromatiden.'],
-    counts: { cells: '2', set: 'n', chr: 2, cpc: '2', dna: '2C je Zelle' },
+    counts: { cells: '2', set: 'n', chr: 2, cpc: '2', dna: '2C je Zelle', C: 2 },
     frame: {
       cells: [
         { cx: 152, cy: H, rx: 128, ry: 108 },
@@ -408,8 +424,9 @@ export const MEIOSE: Phase[] = [
   {
     id: 'metaphase2',
     name: 'Metaphase II',
+    group: 'Meiose II',
     points: ['Vor der Meiose II wird die DNA nicht verdoppelt.', 'In beiden Zellen ordnen sich die Chromosomen in der Äquatorialebene an.'],
-    counts: { cells: '2', set: 'n', chr: 2, cpc: '2', dna: '2C je Zelle' },
+    counts: { cells: '2', set: 'n', chr: 2, cpc: '2', dna: '2C je Zelle', C: 2 },
     frame: {
       cells: [
         { cx: L, cy: H, rx: 98, ry: 124 },
@@ -437,8 +454,9 @@ export const MEIOSE: Phase[] = [
   {
     id: 'anaphase2',
     name: 'Anaphase II',
+    group: 'Meiose II',
     points: ['Jetzt werden die Schwesterchromatiden getrennt – wie bei der Mitose.', 'Durch das Crossing-over sind die Schwesterchromatiden nicht mehr gleich.'],
-    counts: { cells: '2', set: '2 × n', chr: 4, cpc: '1', dna: '2C je Zelle' },
+    counts: { cells: '2', set: '2 × n', chr: 4, cpc: '1', dna: '2C je Zelle', C: 2 },
     frame: {
       cells: [
         { cx: L, cy: H, rx: 92, ry: 134 },
@@ -466,8 +484,9 @@ export const MEIOSE: Phase[] = [
   {
     id: 'ergebnis',
     name: 'Telophase II · Ergebnis',
+    group: 'Meiose II',
     points: ['Vier haploide Keimzellen (n) mit je einer Chromatide pro Chromosom.', 'Alle vier sind genetisch verschieden.', 'Beim Menschen gibt es allein durch die zufällige Verteilung 2²³ ≈ 8,4 Millionen Kombinationen.'],
-    counts: { cells: '4', set: 'n', chr: 2, cpc: '1', dna: '1C je Zelle' },
+    counts: { cells: '4', set: 'n', chr: 2, cpc: '1', dna: '1C je Zelle', C: 1 },
     frame: {
       cells: quarterCells(68, 66),
       nuclei: [
