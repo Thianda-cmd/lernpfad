@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { FLAMES, HALIDES, NACHWEISE, type Nachweis, type Step } from '../../chem/nachweise'
-import { Burner, Eq, Sp, Tube, type TubeState } from '../../chem/lab'
+import { Burner, Dish, Eq, Sp, Tube, type DishState, type TubeState } from '../../chem/lab'
 import { Formula } from '../../chem/format'
 import { IconCheck } from '../../components/icons'
 import '../../styles/chem.css'
@@ -13,21 +13,33 @@ const VIEWS = [
   { id: 'quiz', label: 'Quiz' },
 ] as const
 
+/** Zustand des Uhrglases nach Schritt i */
+function dishAt(steps: Step[], i: number): DishState {
+  let fill = 0
+  let liquid = 'transparent'
+  let solid = 0
+  for (let k = 0; k <= i; k++) {
+    const s = steps[k]
+    if (s.fill !== undefined) fill = s.fill
+    if (s.liquid) liquid = s.liquid
+    if (s.solid !== undefined) solid = s.solid
+  }
+  return { fill, liquid, solid, gas: steps[i].gas, drops: steps[i].drops }
+}
+
 /** Zustand des Reagenzglases nach Schritt i */
-function tubeAt(steps: Step[], i: number): TubeState & { tube2?: Step['tube2'] } {
+function tubeAt(steps: Step[], i: number): TubeState {
   let fill = 0
   let liquid = 'transparent'
   let ppt: TubeState['ppt'] = null
   let pptStep = -1
   let ring: string | undefined
-  let tube2: Step['tube2']
   let goneNow: TubeState['ppt'] = null
   for (let k = 0; k <= i; k++) {
     const s = steps[k]
     if (s.fill !== undefined) fill = s.fill
     if (s.liquid) liquid = s.liquid
     if (s.ring) ring = s.ring
-    if (s.tube2) tube2 = s.tube2
     if (s.ppt === 'weg') {
       if (k === i) goneNow = ppt
       ppt = null
@@ -46,7 +58,6 @@ function tubeAt(steps: Step[], i: number): TubeState & { tube2?: Step['tube2'] }
     drops: cur.drops,
     ring,
     heat: cur.heat,
-    tube2,
   }
 }
 
@@ -88,21 +99,13 @@ function Bench({ n }: { n: Nachweis }) {
         <div className="nw-scene">
           {flameStep ? (
             <Burner color={step.flame ?? (step.stick ? flame : 'base')} stick={step.stick ?? !!step.reagent} cobalt={step.cobalt} />
+          ) : n.vessel === 'uhrglas' ? (
+            <svg viewBox="18 112 204 166" role="img" aria-label="Uhrglas">
+              <Dish state={dishAt(n.steps, i)} uid={`${n.id}-${i}`} />
+            </svg>
           ) : (
             <svg viewBox="0 -18 240 340" role="img" aria-label="Reagenzglas">
-              <Tube cx={t.tube2 ? 78 : 120} state={t} id={n.id} uid={`${n.id}-${i}`} />
-              {t.tube2 && (
-                <>
-                  <path className="tube__hose" d="M78 52 V22 H172 V250" />
-                  <rect className="tube__stopper" x="64" y="48" width="28" height="14" rx="2" />
-                  <Tube
-                    cx={172}
-                    state={{ fill: 0.42, liquid: t.tube2.liquid, ppt: t.tube2.ppt ?? null, pptMode: 'new', gas: true }}
-                    id={n.id + '2'}
-                    uid={`${n.id}-${i}-2`}
-                  />
-                </>
-              )}
+              <Tube cx={120} state={t} id={n.id} uid={`${n.id}-${i}`} />
             </svg>
           )}
         </div>

@@ -23,8 +23,8 @@ export interface Step {
   gas?: boolean
   ring?: string
   heat?: boolean
-  /** zweites Glas (z. B. Kalkwasser) */
-  tube2?: { liquid: string; ppt?: Ppt }
+  /** Uhrglas: Menge der festen Probe (0–1) */
+  solid?: number
   // Flammenfärbung
   flame?: string
   stick?: boolean
@@ -43,6 +43,8 @@ export interface Nachweis {
   name: string
   kind: 'anion' | 'kation'
   method: 'faellung' | 'gas' | 'farbe' | 'flamme'
+  /** Standard: Reagenzglas */
+  vessel?: 'uhrglas'
   status: 'praktikum' | 'spaeter'
   /** Reagenzien kurz, für die Liste */
   short: string
@@ -68,7 +70,6 @@ export const C = {
   deepBlue: '#2a5bb0',
   lightBlue: '#8db6d6',
   brown: '#6e4a26',
-  milky: 'rgba(236, 233, 224, 0.75)',
 }
 
 const loesen: Step = { act: 'Probe in ca. 2 mL dest. Wasser lösen', reagent: 'H2O', fill: 0.34, liquid: C.clear }
@@ -167,18 +168,23 @@ export const NACHWEISE: Nachweis[] = [
     name: 'Carbonat',
     kind: 'anion',
     method: 'gas',
+    vessel: 'uhrglas',
     status: 'praktikum',
-    short: 'H2SO4, Kalkwasser',
-    reagentName: 'verdünnte Säure + Kalkwasser',
+    short: 'H2SO4 auf dem Uhrglas',
+    reagentName: 'verdünnte Schwefelsäure',
     steps: [
-      { act: 'Feste Probe ins Reagenzglas geben', fill: 0, ppt: { color: C.white, size: 'kaesig' } },
-      { act: 'Verdünnte Schwefelsäure zugeben', reagent: 'H2SO4', drops: true, fill: 0.3, liquid: C.clear, gas: true, ppt: 'weg', obs: 'Aufschäumen, farbloses Gas' },
-      { act: 'Gas in Kalkwasser leiten', reagent: 'Ca(OH)2', gas: true, tube2: { liquid: C.milky, ppt: { color: C.white, size: 'fein' } }, obs: 'Kalkwasser wird trüb' },
+      { act: 'Etwas feste Probe auf ein Uhrglas geben', solid: 1 },
+      { act: 'Verdünnte Schwefelsäure zutropfen', reagent: 'H2SO4', drops: true, fill: 0.55, liquid: C.clear, solid: 0.7, gas: true, obs: 'Kohlensäure entsteht – sofort Aufbrausen' },
+      { act: 'Beobachten', fill: 0.6, solid: 0.25, gas: true, obs: 'Kohlensäure zerfällt: farbloses, geruchloses Gas (CO₂) entweicht' },
     ],
-    eq: ['CO3^2- + 2 H3O^+ → CO2↑ + 3 H2O', 'CO2 + Ca^2+ + 2 OH^- → CaCO3↓{weiß} + H2O'],
-    result: 'mit Säure entsteht ein farbloses Gas, das Kalkwasser trübt',
-    swatch: C.milky,
-    notes: [{ t: 'Geht auch mit Salzsäure. Statt Kalkwasser kann Barytwasser Ba(OH)₂ genommen werden.' }],
+    eq: ['CO3^2- + 2 H3O^+ → H2CO3{Kohlensäure} + 2 H2O', 'H2CO3{instabil} → CO2↑ + H2O'],
+    result: 'Aufbrausen mit verdünnter Schwefelsäure – über Kohlensäure entweicht CO₂',
+    swatch: 'transparent',
+    notes: [
+      { t: 'Beispiel Natriumcarbonat mit Schwefelsäure:', eq: 'Na2CO3 + H2SO4 → Na2SO4 + H2CO3' },
+      { t: 'Kohlensäure ist nur ein Übergang: Sie zerfällt sofort in Wasser und Kohlenstoffdioxid – daher das Aufbrausen.' },
+      { t: 'Insgesamt:', eq: 'CO3^2- + 2 H3O^+ → CO2↑ + 3 H2O' },
+    ],
   },
   {
     id: 'natrium',

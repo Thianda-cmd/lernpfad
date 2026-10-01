@@ -2191,17 +2191,6 @@ button.legend__i:hover,
   animation: nw-flicker 1.2s ease-in-out infinite;
 }
 
-.tube__hose {
-  fill: none;
-  stroke: var(--text-3);
-  stroke-width: 3;
-  stroke-linejoin: round;
-}
-
-.tube__stopper {
-  fill: var(--sand-2);
-}
-
 @keyframes nw-fade {
   from {
     opacity: 0;
@@ -2881,5 +2870,99 @@ button.legend__i:hover,
   .tube__drop,
   .tube__gas circle {
     opacity: 0;
+  }
+}
+/* Uhrglas */
+.dish__tile {
+  fill: var(--surface-3);
+  stroke: var(--line-2);
+}
+
+.dish__glass {
+  fill: none;
+  stroke: var(--text-3);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+
+.dish__shine {
+  fill: none;
+  stroke: var(--line-2);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+}
+
+.dish__liquid {
+  transition: transform 0.9s cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+
+.dish__solid {
+  transform-box: view-box;
+  transform-origin: 120px 241px;
+  transition: transform 1.6s ease;
+}
+
+.dish__solid path,
+.dish__solid circle {
+  fill: #f1eee6;
+  stroke: rgba(120, 120, 110, 0.35);
+  stroke-width: 0.6;
+}
+
+.dish__fizz circle {
+  fill: none;
+  stroke: var(--text-2);
+  stroke-width: 0.8;
+  opacity: 0;
+  animation: nw-fizz 0.9s ease-out infinite;
+}
+
+.dish__co2 text {
+  font-size: 10px;
+  font-weight: 600;
+  fill: var(--text-3);
+  text-anchor: middle;
+  opacity: 0;
+  animation: nw-co2 2.2s ease-out infinite;
+}
+
+.dish__label {
+  font-size: 10.5px;
+  fill: var(--text-3);
+  text-anchor: middle;
+}
+
+@keyframes nw-fizz {
+  0% {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  40% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes nw-co2 {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  20% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-62px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dish * {
+    animation: none !important;
+    transition: none !important;
   }
 }

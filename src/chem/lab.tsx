@@ -170,6 +170,84 @@ export function Tube({ cx, state, id, uid }: { cx: number; state: TubeState; id:
 export const TUBE_H = BOTTOM + 34
 
 /* ---------------------------------------------------------------------------
+   Uhrglas (z. B. Carbonat mit Schwefelsäure)
+   Glas: quadratische Kurve von (30|212) über (120|268) nach (210|212), tiefster Punkt y = 240
+   --------------------------------------------------------------------------- */
+
+export interface DishState {
+  solid: number
+  fill: number
+  liquid: string
+  gas?: boolean
+  drops?: boolean
+}
+
+const GLASS = 'M30 212 Q120 268 210 212'
+
+export function Dish({ state, uid }: { state: DishState; uid: string }) {
+  const { solid, fill, liquid, gas, drops } = state
+  const clip = `dish-${uid}`
+  const level = 240 - fill * 22
+  const fizz = useMemo(() => {
+    const rng = mulberry32(5)
+    return Array.from({ length: 16 }, () => ({ x: 120 + (rng() - 0.5) * 70, r: 1 + rng() * 1.8, d: rng() * 1.4, t: 0.7 + rng() * 0.6 }))
+  }, [])
+  const grains = useMemo(() => {
+    const rng = mulberry32(9)
+    return Array.from({ length: 14 }, () => ({ x: 120 + (rng() - 0.5) * 40, y: 236 - rng() * 8, r: 0.8 + rng() * 1.2 }))
+  }, [])
+  return (
+    <g className="dish">
+      <defs>
+        <clipPath id={clip}>
+          <path d={GLASS + ' Z'} />
+        </clipPath>
+      </defs>
+      <rect className="dish__tile" x="14" y="242" width="212" height="12" rx="3" />
+      <g clipPath={`url(#${clip})`}>
+        <rect className="dish__liquid" x="30" y="212" width="180" height="30" style={{ fill: liquid, transform: `translateY(${(1 - fill) * 30}px)` }} />
+        <g className="dish__solid" style={{ transform: `scale(${solid})` }}>
+          <path d="M92 241 Q120 214 148 241 Z" />
+          {grains.map((g, i) => (
+            <circle key={i} cx={g.x} cy={g.y} r={g.r} />
+          ))}
+        </g>
+        {gas && fill > 0 && (
+          <g key={`fizz-${uid}`} className="dish__fizz">
+            {fizz.map((b, i) => (
+              <circle key={i} cx={b.x} cy={level + 1} r={b.r} style={{ animationDelay: `${b.d}s`, animationDuration: `${b.t}s` }} />
+            ))}
+          </g>
+        )}
+      </g>
+      <path className="dish__glass" d={GLASS} />
+      <path className="dish__shine" d="M52 222 Q86 240 108 243" />
+      {gas && fill > 0 && (
+        <g key={`co2-${uid}`} className="dish__co2">
+          {[0, 1, 2, 3].map((k) => (
+            <text key={k} x={98 + k * 15} y={222} style={{ animationDelay: `${k * 0.55}s` }}>
+              CO₂
+            </text>
+          ))}
+        </g>
+      )}
+      {drops && (
+        <g key={`drops-${uid}`} className="tube__pipette">
+          <path className="tube__pip" d="M117 140 h6 v34 l-2 10 h-2 l-2 -10 Z" />
+          <rect className="tube__bulb" x={114} y={120} width={12} height={22} rx={6} />
+          {[0, 1, 2].map((k) => (
+            <ellipse key={k} className="tube__drop" cx={120} cy={188} rx={2.2} ry={3} style={{ animationDelay: `${0.15 + k * 0.38}s`, ['--to' as string]: `${level - 190}px` }} />
+          ))}
+        </g>
+      )}
+      <text className="dish__label" x="120" y="272">
+        Uhrglas
+      </text>
+    </g>
+  )
+}
+
+/* ---------------------------------------------------------------------------
    Bunsenbrenner mit Flammenfärbung
    --------------------------------------------------------------------------- */
 
