@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react'
 import { MEMBRAN_LABEL, ORGANELLES, childrenOf, type CellType, type OrganelleId } from '../data/organelles'
 import { useProgress } from '../store/progress'
 import { IconArrowLeft, IconCheck, IconChevronLeft, IconChevronRight } from './icons'
+import { ZellwandVokabeln } from './ZellwandVokabeln'
 
 export function OrganelleBadges({ id }: { id: OrganelleId }) {
   const o = ORGANELLES[id]
@@ -22,8 +23,6 @@ export function OrganelleBadges({ id }: { id: OrganelleId }) {
 
 export function OrganelleBody({ id, onNavigate }: { id: OrganelleId; onNavigate?: (id: OrganelleId) => void }) {
   const o = ORGANELLES[id]
-  const kids = childrenOf(id)
-  const related: OrganelleId[] = [...(o.parent ? [o.parent] : []), ...kids]
   return (
     <div className="odetail" style={{ '--c': o.farbe } as CSSProperties}>
       <div className="odetail__top">
@@ -34,6 +33,24 @@ export function OrganelleBody({ id, onNavigate }: { id: OrganelleId; onNavigate?
         </div>
       </div>
       <OrganelleBadges id={id} />
+      {id === 'zellwand' ? (
+        <>
+          <p className="odetail__lead">{o.kurz}</p>
+          <ZellwandVokabeln onNavigate={onNavigate} />
+        </>
+      ) : (
+        <OrganelleText id={id} onNavigate={onNavigate} />
+      )}
+    </div>
+  )
+}
+
+function OrganelleText({ id, onNavigate }: { id: OrganelleId; onNavigate?: (id: OrganelleId) => void }) {
+  const o = ORGANELLES[id]
+  const kids = childrenOf(id)
+  const related: OrganelleId[] = [...(o.parent ? [o.parent] : []), ...kids]
+  return (
+    <>
       <blockquote className="odetail__analogy">{o.analogie}</blockquote>
       <p className="odetail__lead">{o.kurz}</p>
 
@@ -107,7 +124,7 @@ export function OrganelleBody({ id, onNavigate }: { id: OrganelleId; onNavigate?
           </div>
         )}
       </div>
-    </div>
+    </>
   )
 }
 

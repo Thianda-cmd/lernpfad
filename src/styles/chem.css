@@ -1368,9 +1368,13 @@ button.legend__i:hover,
 }
 
 .tool__sig {
-  display: flex;
-  align-items: center;
+  /* kein Flex: sonst stehen <sub>/<sup> auf der Grundlinie */
+  display: block;
   height: 64px;
+  line-height: 64px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   padding: 0 16px;
   margin-bottom: 8px;
   border-radius: 12px;
@@ -2739,97 +2743,6 @@ button.legend__i:hover,
   color: var(--text-3);
 }
 
-/* Quiz */
-.nw-quiz {
-  max-width: 780px;
-  padding: 20px 22px;
-}
-
-.nw-quiz__top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.nw-quiz__score {
-  font-size: 12.5px;
-  color: var(--text-3);
-}
-
-.nw-quiz__q {
-  margin: 18px 0 14px;
-  font-size: 17px;
-  line-height: 1.45;
-}
-
-.nw-quiz__opts {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.nw-opt {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  border: 1px solid var(--line-2);
-  border-radius: 12px;
-  background: var(--surface);
-  font: inherit;
-  font-size: 14px;
-  color: var(--text);
-  text-align: left;
-  cursor: pointer;
-}
-
-.nw-opt:hover:not(:disabled) {
-  border-color: var(--green);
-}
-
-.nw-opt .sp {
-  min-width: 46px;
-  font-weight: 620;
-}
-
-.nw-opt.is-right {
-  border-color: var(--green);
-  background: var(--green-soft);
-}
-
-.nw-opt.is-wrong {
-  border-color: var(--sand);
-  background: var(--sand-soft);
-}
-
-.nw-opt.is-dim {
-  opacity: 0.5;
-}
-
-.nw-quiz__after {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-top: 16px;
-}
-
-.nw-quiz__end {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-top: 20px;
-}
-
-.nw-quiz__end strong {
-  font-family: var(--font-serif);
-  font-size: 30px;
-  font-weight: 400;
-}
-
 @media (max-width: 1050px) {
   .nw {
     grid-template-columns: minmax(0, 1fr);
@@ -2851,9 +2764,6 @@ button.legend__i:hover,
   .nw-flame__stage {
     max-width: 220px;
     margin: 0 auto;
-  }
-  .nw-quiz__opts {
-    grid-template-columns: minmax(0, 1fr);
   }
   .eqn {
     font-size: 16px;

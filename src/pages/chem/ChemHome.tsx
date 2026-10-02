@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { ELEMENTS, position } from '../../chem/elements'
 import { IconArrowRight } from '../../components/icons'
+import { CHEM_CALC } from '../../math/tools'
 import '../../styles/chem.css'
 
 const CONSTANTS: [string, string, string][] = [
@@ -32,7 +33,7 @@ export default function ChemHome() {
         <div>
           <p className="eyebrow">Fächer · Chemie</p>
           <h1>Chemie</h1>
-          <p>Periodensystem, Formeln und Größen für das Labor.</p>
+          <p>Periodensystem, Rechner und Nachschlagewerk für das Labor.</p>
         </div>
       </header>
 
@@ -77,12 +78,12 @@ export default function ChemHome() {
             <h3>Ionennachweise</h3>
             <p>Sulfat, Halogenide, Carbonat, Flammenfärbung – Schritt für Schritt mit Gleichung.</p>
           </Link>
-          <Link to="/mathematik/stoffmenge" className="tool card card--link">
+          <Link to={CHEM_CALC.path} className="tool card card--link">
             <span className="tool__sig">
-              n = m / M
+              n = m / M · c = n / V
             </span>
-            <h3>Stoffmenge rechnen</h3>
-            <p>Das Kapitel mit deinem Übungsblatt M, m, n – Erklärung, Übungen, Lösungswege.</p>
+            <h3>{CHEM_CALC.title}</h3>
+            <p>Stoffmenge, Zusammensetzung, Lösungen ansetzen, verdünnen und mischen – mit komplettem Rechenweg.</p>
           </Link>
         </div>
       </section>

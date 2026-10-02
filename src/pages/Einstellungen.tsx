@@ -72,8 +72,8 @@ export default function Einstellungen() {
         </div>
         <div className="settings__row">
           <div>
-            <h3>Lernfortschritt zurücksetzen</h3>
-            <p className="muted">Löscht alle Ergebnisse in Biologie und Mathe.</p>
+            <h3>Verlauf zurücksetzen</h3>
+            <p className="muted">Löscht die als gelernt markierten Organellen und die Liste „Zuletzt benutzt“.</p>
           </div>
           {confirm ? (
             <div style={{ display: 'flex', gap: 8 }}>
@@ -101,7 +101,7 @@ export default function Einstellungen() {
       </section>
 
       <p className="faint settings__foot">
-        LernLabor · BTA Bückeburg · Zellmodelle schematisch · Elementdaten: IUPAC, NIST, PubChem
+        Lernpfad · BTA Bückeburg · Zellmodelle schematisch · Elementdaten: IUPAC, NIST, PubChem
       </p>
     </div>
   )

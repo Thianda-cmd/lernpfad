@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import DivisionSvg from '../../bio/DivisionSvg'
-import { COMPARE, CYCLE, FACTS, MEIOSE, MITOSE, type Phase } from '../../bio/division'
+import { COMPARE, CYCLE, MEIOSE, MITOSE, type Phase } from '../../bio/division'
 import '../../styles/bio.css'
 
 const VIEWS = [
@@ -9,7 +9,6 @@ const VIEWS = [
   { id: 'mitose', label: 'Mitose' },
   { id: 'meiose', label: 'Meiose' },
   { id: 'vergleich', label: 'Vergleich' },
-  { id: 'quiz', label: 'Quiz' },
 ] as const
 
 /* ---------------------------------------------------------------------------
@@ -287,117 +286,6 @@ function Cycle() {
   )
 }
 
-/* ---------------------------------------------------------------------------
-   Quiz
-   --------------------------------------------------------------------------- */
-
-type Q = { prompt: string; options: string[]; correct: number; phases?: Phase[]; t?: number }
-
-function shuffle<T>(a: T[]): T[] {
-  const b = [...a]
-  for (let i = b.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[b[i], b[j]] = [b[j], b[i]]
-  }
-  return b
-}
-
-function makeQuiz(): Q[] {
-  const qs: Q[] = []
-  for (const [phases, name] of [
-    [MITOSE, 'Mitose'],
-    [MEIOSE, 'Meiose'],
-  ] as const) {
-    const pool = phases.filter((p) => name === 'Mitose' || (p.id !== 'interphase' && p.id !== 'crossing-over'))
-    for (const p of shuffle(pool).slice(0, 3)) {
-      const opts = shuffle([p.name, ...shuffle(pool.filter((x) => x.id !== p.id).map((x) => x.name)).slice(0, 3)])
-      qs.push({ prompt: `Welche Phase der ${name} ist das?`, options: opts, correct: opts.indexOf(p.name), phases, t: phases.indexOf(p) })
-    }
-  }
-  for (const f of shuffle(FACTS).slice(0, 6)) {
-    const opts = shuffle(f.o)
-    qs.push({ prompt: f.q, options: opts, correct: opts.indexOf(f.o[0]) })
-  }
-  return shuffle(qs)
-}
-
-function Quiz() {
-  const [round, setRound] = useState(0)
-  const qs = useMemo(() => makeQuiz(), [round]) // eslint-disable-line react-hooks/exhaustive-deps
-  const [i, setI] = useState(0)
-  const [picked, setPicked] = useState<number | null>(null)
-  const [score, setScore] = useState(0)
-  const q = qs[i]
-  if (!q)
-    return (
-      <section className="zt-quiz card">
-        <div className="zt-quiz__end">
-          <strong>
-            {score} von {qs.length}
-          </strong>
-          <button
-            type="button"
-            className="btn btn--primary btn--sm"
-            onClick={() => {
-              setRound((r) => r + 1)
-              setI(0)
-              setScore(0)
-              setPicked(null)
-            }}
-          >
-            Neue Runde
-          </button>
-        </div>
-      </section>
-    )
-  return (
-    <section className="zt-quiz card">
-      <div className="zt-quiz__top">
-        <span>
-          Frage {i + 1} / {qs.length}
-        </span>
-        <span>{score} richtig</span>
-      </div>
-      <p className="zt-quiz__q">{q.prompt}</p>
-      {q.phases && <DivisionSvg phases={q.phases} t={q.t!} labels={false} className="zt-quiz__img" />}
-      <div className="zt-quiz__opts">
-        {q.options.map((o, k) => {
-          const st = picked === null ? '' : k === q.correct ? 'is-right' : k === picked ? 'is-wrong' : 'is-dim'
-          return (
-            <button
-              key={o}
-              type="button"
-              className={`zt-opt ${st}`}
-              disabled={picked !== null}
-              onClick={() => {
-                setPicked(k)
-                if (k === q.correct) setScore((s) => s + 1)
-              }}
-            >
-              {o}
-            </button>
-          )
-        })}
-      </div>
-      {picked !== null && (
-        <div className="zt-quiz__after">
-          <span className={picked === q.correct ? 'is-right' : 'is-wrong'}>{picked === q.correct ? 'Richtig.' : `Richtig wäre: ${q.options[q.correct]}`}</span>
-          <button
-            type="button"
-            className="btn btn--primary btn--sm"
-            onClick={() => {
-              setI(i + 1)
-              setPicked(null)
-            }}
-          >
-            {i + 1 < qs.length ? 'Weiter' : 'Auswertung'}
-          </button>
-        </div>
-      )}
-    </section>
-  )
-}
-
 /* --------------------------------------------------------------------------- */
 
 export default function Zellteilung() {
@@ -459,7 +347,6 @@ export default function Zellteilung() {
           </div>
         </section>
       )}
-      {view === 'quiz' && <Quiz />}
     </div>
   )
 }

@@ -571,20 +571,3 @@ export const COMPARE: [string, string, string][] = [
   ['Getrennt werden', 'Schwesterchromatiden', 'erst homologe Chromosomen, dann Schwesterchromatiden'],
   ['Mensch', '46 → 46', '46 → 23'],
 ]
-
-/* ---------------------------- Quiz ---------------------------- */
-
-export const FACTS: { q: string; o: string[] }[] = [
-  { q: 'In welcher Phase wird die DNA verdoppelt?', o: ['S-Phase', 'G1-Phase', 'G2-Phase', 'Metaphase'] },
-  { q: 'Wann werden homologe Chromosomen getrennt?', o: ['Anaphase I', 'Anaphase II', 'Anaphase der Mitose', 'Prophase I'] },
-  { q: 'Wie viele Chromosomen hat eine menschliche Keimzelle?', o: ['23', '46', '92', '22'] },
-  { q: 'Wann findet das Crossing-over statt?', o: ['Prophase I', 'Metaphase I', 'Prophase II', 'Interphase'] },
-  { q: 'Was entsteht bei der Mitose?', o: ['2 genetisch identische Zellen (2n)', '4 verschiedene Zellen (n)', '2 Zellen mit n', '4 identische Zellen (2n)'] },
-  { q: 'Welcher DNA-Gehalt liegt in der G2-Phase vor?', o: ['4C', '2C', '1C', '8C'] },
-  { q: 'Wo setzen die Spindelfasern an?', o: ['am Zentromer (Kinetochor)', 'an den Chromosomenenden', 'an der Kernhülle', 'am Kernkörperchen'] },
-  { q: 'Wie wird eine Pflanzenzelle bei der Cytokinese geteilt?', o: ['durch eine Zellplatte', 'durch Einschnürung', 'durch Knospung', 'gar nicht'] },
-  { q: 'Was ist ein Bivalent (Tetrade)?', o: ['zwei gepaarte homologe Chromosomen mit vier Chromatiden', 'ein Chromosom mit zwei Chromatiden', 'die vier Zellen nach der Meiose', 'zwei Zentrosomen'] },
-  { q: 'Welche Teilung ist die Reduktionsteilung?', o: ['Meiose I', 'Meiose II', 'Mitose', 'Cytokinese'] },
-  { q: 'Wie viele Chromosomen hat eine menschliche Zelle in der Anaphase der Mitose?', o: ['92', '46', '23', '69'] },
-  { q: 'Was wird in der Anaphase II getrennt?', o: ['Schwesterchromatiden', 'homologe Chromosomen', 'Zellkerne', 'Zentrosomen'] },
-]

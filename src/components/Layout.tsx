@@ -5,48 +5,35 @@ import { useProgress } from '../store/progress'
 import { ALL_ORGANELLE_IDS } from '../data/organelles'
 import { Logo } from './Logo'
 import { ErrorBoundary } from './ErrorBoundary'
-import { CHAPTERS, MOCKS, SHEETS } from '../math/meta'
+import { CHEM_CALC, MATH_TOOLS } from '../math/tools'
 import {
-  IconChapters,
   IconFlask,
   IconIons,
   IconTube,
   IconDivide,
   IconPeriodic,
-  IconExam,
-  IconFormula,
-  IconSheet,
   IconAnimalCell,
-  IconBiology,
   IconBook,
-  IconCards,
-  IconChemistry,
   IconChevronRight,
   IconClose,
   IconCompare,
-  IconMath,
   IconMenu,
   IconMoon,
   IconOverview,
   IconPlantCell,
-  IconQuiz,
   IconSettings,
   IconSidebar,
   IconSun,
 } from './icons'
 
 const CRUMB_LABELS: Record<string, string> = {
-  ...Object.fromEntries(MOCKS.map((m) => [m.id, m.title])),
-  ...Object.fromEntries(SHEETS.map((s) => [s.id, s.title])),
-  ...Object.fromEntries(CHAPTERS.map((c) => [c.id, c.title])),
+  ...Object.fromEntries(MATH_TOOLS.map((t) => [t.id, t.title])),
+  rechnen: CHEM_CALC.title,
   periodensystem: 'Periodensystem',
   molmasse: 'Molare Masse',
   ionen: 'Ionen & Salze',
   nachweise: 'Ionennachweise',
   zellteilung: 'Zellteilung',
-  blatt: 'Übungsblatt',
-  probeklausur: 'Probeklausur',
-  formelsammlung: 'Formelsammlung',
   biologie: 'Biologie',
   chemie: 'Chemie',
   mathematik: 'Mathematik',
@@ -55,8 +42,6 @@ const CRUMB_LABELS: Record<string, string> = {
   pflanzenzelle: 'Pflanzenzelle',
   vergleich: 'Vergleich',
   lexikon: 'Organellen-Lexikon',
-  karteikarten: 'Karteikarten',
-  quiz: 'Quiz',
   einstellungen: 'Einstellungen',
 }
 
@@ -86,9 +71,8 @@ function Crumbs() {
     <nav className="crumbs" aria-label="Brotkrumen">
       <Link to="/">Übersicht</Link>
       {parts.map((p, i) => {
-        // Zwischenebenen ohne eigene Seite führen zur Fachübersicht
-        const to = p === 'blatt' || p === 'probeklausur' ? '/' + parts.slice(0, i).join('/') : '/' + parts.slice(0, i + 1).join('/')
-        const label = parts[i - 1] === 'blatt' ? (SHEETS.find((s) => s.id === p)?.title ?? p) : (CRUMB_LABELS[p] ?? p)
+        const to = '/' + parts.slice(0, i + 1).join('/')
+        const label = CRUMB_LABELS[p] ?? p
         const last = i === parts.length - 1
         return (
           <span key={to} style={{ display: 'contents' }}>
@@ -118,6 +102,16 @@ function NavItem({ to, icon, label, badge, end, match }: { to: string; icon: Rea
   )
 }
 
+/** Abschnittsüberschrift, die zur Fachübersicht führt */
+function NavSection({ to, label }: { to: string; label: string }) {
+  return (
+    <NavLink to={to} end className={({ isActive }) => `nav__section nav__section--link ${isActive ? 'is-active' : ''}`}>
+      {label}
+      <IconChevronRight size={13} />
+    </NavLink>
+  )
+}
+
 export default function Layout() {
   const [open, setOpen] = useState(false)
   const [collapsedPref, setCollapsedPref] = useState(() => {
@@ -135,17 +129,12 @@ export default function Layout() {
   const collapsed = !mobile && (fullscreen ? !fsExpanded : collapsedPref)
   const theme = useTheme()
   const learned = useProgress((s) => Object.keys(s.learned).length)
-  const touchDay = useProgress((s) => s.touchDay)
   const total = ALL_ORGANELLE_IDS.length
 
   useEffect(() => {
     setOpen(false)
     window.scrollTo({ top: 0 })
   }, [pathname])
-
-  useEffect(() => {
-    touchDay()
-  }, [touchDay])
 
   const toggleCollapsed = () => {
     if (fullscreen) {
@@ -166,13 +155,13 @@ export default function Layout() {
     <div className={`app ${open ? 'nav-open' : ''} ${collapsed ? 'is-collapsed' : ''}`}>
       <aside className="sidebar" aria-label="Hauptnavigation">
         <div className="sidebar__top">
-          <Link to="/" className="brand" aria-label="LernLabor – Übersicht">
+          <Link to="/" className="brand" aria-label="Lernpfad – Übersicht">
             <span className="brand__mark">
               <Logo size={22} accent="#d2b57f" />
             </span>
             <span className="brand__text">
               <div className="brand__name">
-                Lern<em>Labor</em>
+                Lern<em>pfad</em>
               </div>
               <div className="brand__sub">BTA · Bückeburg</div>
             </span>
@@ -188,28 +177,21 @@ export default function Layout() {
         </div>
         <nav className="nav">
           <NavItem to="/" end icon={<IconOverview />} label="Übersicht" />
-          <div className="nav__section">Fächer</div>
-          <NavItem to="/biologie" icon={<IconBiology />} label="Biologie" />
-          <NavItem to="/chemie" icon={<IconChemistry />} label="Chemie" />
-          <NavItem to="/mathematik" icon={<IconMath />} label="Mathematik" />
-          <div className="nav__section">Chemie</div>
+          <NavSection to="/mathematik" label="Mathematik" />
+          {MATH_TOOLS.map((t) => (
+            <NavItem key={t.id} to={t.path} icon={<t.icon />} label={t.nav} />
+          ))}
+          <NavSection to="/chemie" label="Chemie" />
           <NavItem to="/chemie/periodensystem" icon={<IconPeriodic />} label="Periodensystem" />
           <NavItem to="/chemie/molmasse" icon={<IconFlask />} label="Molare Masse" />
+          <NavItem to={CHEM_CALC.path} icon={<CHEM_CALC.icon />} label={CHEM_CALC.nav} />
           <NavItem to="/chemie/ionen" icon={<IconIons />} label="Ionen & Salze" />
           <NavItem to="/chemie/nachweise" icon={<IconTube />} label="Ionennachweise" />
-          <div className="nav__section">Mathematik</div>
-          <NavItem to="/mathematik/klammern" match={/^\/mathematik\/(?!blatt|probeklausur|formelsammlung)[^/]+$/} icon={<IconChapters />} label="Kapitel" />
-          <NavItem to="/mathematik/blatt/klammern" match={/^\/mathematik\/blatt\//} icon={<IconSheet />} label="Übungsblätter" />
-          <NavItem to="/mathematik/probeklausur/lf1t" match={/^\/mathematik\/probeklausur\//} icon={<IconExam />} label="Probeklausur" />
-          <NavItem to="/mathematik/formelsammlung" icon={<IconFormula />} label="Formelsammlung" />
-          <div className="nav__section">Zellbiologie</div>
+          <NavSection to="/biologie" label="Biologie" />
           <NavItem to="/biologie/zellbiologie/tierzelle" icon={<IconAnimalCell />} label="Tierzelle" />
           <NavItem to="/biologie/zellbiologie/pflanzenzelle" icon={<IconPlantCell />} label="Pflanzenzelle" />
           <NavItem to="/biologie/zellbiologie/vergleich" icon={<IconCompare />} label="Vergleich" />
           <NavItem to="/biologie/zellbiologie/lexikon" icon={<IconBook />} label="Lexikon" />
-          <NavItem to="/biologie/zellbiologie/karteikarten" icon={<IconCards />} label="Karteikarten" />
-          <NavItem to="/biologie/zellbiologie/quiz" icon={<IconQuiz />} label="Quiz" />
-          <div className="nav__section">Zellteilung</div>
           <NavItem to="/biologie/zellteilung" icon={<IconDivide />} label="Mitose & Meiose" />
         </nav>
         <div className="sidebar__footer">

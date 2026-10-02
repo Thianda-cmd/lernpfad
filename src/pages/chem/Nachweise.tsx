@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { FLAMES, HALIDES, NACHWEISE, type Nachweis, type Step } from '../../chem/nachweise'
 import { Burner, Dish, Eq, Sp, Tube, type DishState, type TubeState } from '../../chem/lab'
@@ -10,7 +10,6 @@ const VIEWS = [
   { id: 'nachweise', label: 'Nachweise' },
   { id: 'halogenide', label: 'Halogenide vergleichen' },
   { id: 'flamme', label: 'Flammenfärbung' },
-  { id: 'quiz', label: 'Quiz' },
 ] as const
 
 /** Zustand des Uhrglases nach Schritt i */
@@ -362,130 +361,6 @@ function FlameView() {
   )
 }
 
-/* ---------------------------------------------------------------------------
-   Quiz
-   --------------------------------------------------------------------------- */
-
-type Q = { prompt: string; options: { text: string; ion?: string }[]; correct: number; eq?: string }
-
-function shuffle<T>(a: T[]): T[] {
-  const b = [...a]
-  for (let i = b.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[b[i], b[j]] = [b[j], b[i]]
-  }
-  return b
-}
-
-function makeQuiz(all: boolean): Q[] {
-  const pool = NACHWEISE.filter((n) => all || n.status === 'praktikum')
-  const byName = [...new Map(pool.map((n) => [n.name, n])).values()]
-  const qs: Q[] = []
-  const ACIDS = ['Salzsäure', 'Salpetersäure', 'Schwefelsäure', 'Essigsäure']
-  for (const n of pool) {
-    const others = shuffle(byName.filter((x) => x.name !== n.name)).slice(0, 3)
-    const opts = shuffle([n, ...others])
-    qs.push({ prompt: `${n.result[0].toUpperCase()}${n.result.slice(1)}. Welches Ion liegt vor?`, options: opts.map((o) => ({ text: o.name, ion: o.ion })), correct: opts.indexOf(n), eq: n.eq[0] })
-    const sameName = new Set(pool.filter((x) => x.name === n.name).map((x) => x.reagentName))
-    const rs = shuffle([...new Set(pool.map((x) => x.reagentName))].filter((r) => !sameName.has(r))).slice(0, 3)
-    const ropts = shuffle([n.reagentName, ...rs])
-    qs.push({ prompt: `Womit weist du ${n.name}-Ionen nach?`, options: ropts.map((t) => ({ text: t })), correct: ropts.indexOf(n.reagentName), eq: n.eq[0] })
-    if (n.acid) {
-      const aopts = shuffle(ACIDS)
-      qs.push({ prompt: `Womit säuerst du beim ${n.name}-Nachweis an?`, options: aopts.map((t) => ({ text: t })), correct: aopts.indexOf(n.acid), eq: n.eq[0] })
-    }
-  }
-  for (const f of FLAMES.filter((x) => x.id !== 'NaK' && (all || ['Na', 'K'].includes(x.id)))) {
-    const opts = shuffle([f, ...shuffle(FLAMES.filter((x) => x.id !== f.id && x.id !== 'NaK')).slice(0, 3)])
-    qs.push({ prompt: `Welche Flammenfärbung zeigt ${f.name}?`, options: opts.map((o) => ({ text: o.text })), correct: opts.indexOf(f) })
-  }
-  return shuffle(qs).slice(0, 10)
-}
-
-function QuizView() {
-  const [all, setAll] = useState(false)
-  const [seed, setSeed] = useState(0)
-  const qs = useMemo(() => makeQuiz(all), [all, seed]) // eslint-disable-line react-hooks/exhaustive-deps
-  const [i, setI] = useState(0)
-  const [picked, setPicked] = useState<number | null>(null)
-  const [score, setScore] = useState(0)
-  const restart = (a = all) => {
-    setAll(a)
-    setSeed((s) => s + 1)
-    setI(0)
-    setPicked(null)
-    setScore(0)
-  }
-  const done = i >= qs.length
-  const q = qs[i]
-  return (
-    <section className="nw-quiz card">
-      <div className="nw-quiz__top">
-        <div className="seg seg--sm">
-          <button type="button" className={`seg__btn ${!all ? 'is-active' : ''}`} onClick={() => restart(false)}>
-            Praktikum
-          </button>
-          <button type="button" className={`seg__btn ${all ? 'is-active' : ''}`} onClick={() => restart(true)}>
-            Alle
-          </button>
-        </div>
-        <span className="nw-quiz__score">
-          {Math.min(i + 1, qs.length)} / {qs.length} · {score} richtig
-        </span>
-      </div>
-      {done ? (
-        <div className="nw-quiz__end">
-          <strong>
-            {score} von {qs.length}
-          </strong>
-          <button type="button" className="btn btn--primary btn--sm" onClick={() => restart()}>
-            Neue Runde
-          </button>
-        </div>
-      ) : (
-        <>
-          <p className="nw-quiz__q">{q.prompt}</p>
-          <div className="nw-quiz__opts">
-            {q.options.map((o, k) => {
-              const state = picked === null ? '' : k === q.correct ? 'is-right' : k === picked ? 'is-wrong' : 'is-dim'
-              return (
-                <button
-                  key={k}
-                  type="button"
-                  className={`nw-opt ${state}`}
-                  disabled={picked !== null}
-                  onClick={() => {
-                    setPicked(k)
-                    if (k === q.correct) setScore((s) => s + 1)
-                  }}
-                >
-                  {o.ion && <Sp s={o.ion} />}
-                  <span>{o.text}</span>
-                </button>
-              )
-            })}
-          </div>
-          {picked !== null && (
-            <div className="nw-quiz__after">
-              {q.eq && <Eq s={q.eq} />}
-              <button
-                type="button"
-                className="btn btn--primary btn--sm"
-                onClick={() => {
-                  setI(i + 1)
-                  setPicked(null)
-                }}
-              >
-                {i + 1 < qs.length ? 'Weiter' : 'Auswertung'}
-              </button>
-            </div>
-          )}
-        </>
-      )}
-    </section>
-  )
-}
-
 /* --------------------------------------------------------------------------- */
 
 export default function Nachweise() {
@@ -515,7 +390,6 @@ export default function Nachweise() {
       {view === 'nachweise' && <NachweisView />}
       {view === 'halogenide' && <HalideView />}
       {view === 'flamme' && <FlameView />}
-      {view === 'quiz' && <QuizView />}
     </div>
   )
 }
