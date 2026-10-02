@@ -707,10 +707,18 @@ ol {
 
 .seg {
   display: inline-flex;
+  max-width: 100%;
   padding: 3px;
   gap: 2px;
   border-radius: 11px;
   background: var(--surface-2);
+  /* zu breit für schmale Handys: seitlich wischen statt die ganze Seite zu verbreitern */
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.seg::-webkit-scrollbar {
+  display: none;
 }
 
 .seg__btn {

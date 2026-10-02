@@ -5,6 +5,7 @@ import { useProgress } from '../store/progress'
 import { ALL_ORGANELLE_IDS } from '../data/organelles'
 import { Logo } from './Logo'
 import { ErrorBoundary } from './ErrorBoundary'
+import SidebarAccount, { TopbarAccount } from './BlobAccount'
 import { CHEM_CALC, MATH_TOOLS } from '../math/tools'
 import {
   IconFlask,
@@ -206,6 +207,7 @@ export default function Layout() {
               <div className="progress__bar" style={{ width: `${(learned / total) * 100}%` }} />
             </div>
           </div>
+          <SidebarAccount collapsed={collapsed} />
           <div className="sidebar__actions">
             <button className="icon-btn" onClick={theme.toggle} aria-label="Farbschema wechseln" title={theme.dark ? 'Helles Design' : 'Dunkles Design'}>
               {theme.dark ? <IconSun /> : <IconMoon />}
@@ -224,6 +226,7 @@ export default function Layout() {
           </button>
           <Crumbs />
           <div className="topbar__spacer" />
+          <TopbarAccount />
         </header>
         <ErrorBoundary key={pathname}>
           <Outlet />

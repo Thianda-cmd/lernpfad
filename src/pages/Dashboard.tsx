@@ -1,6 +1,7 @@
 import { useDeferredValue, useMemo, useState, type ComponentType } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ALL_ORGANELLE_IDS } from '../data/organelles'
+import { firstName, useBlobUser } from '../auth/blob'
 import { useProgress } from '../store/progress'
 import { CHEM_CALC, MATH_TOOLS } from '../math/tools'
 import { detect } from '../math/quick'
@@ -134,6 +135,8 @@ function TileGrid({ items }: { items: Tile[] }) {
 }
 
 export default function Dashboard() {
+  const user = useBlobUser()
+  const name = user ? firstName(user) : ''
   const learned = useProgress((s) => Object.keys(s.learned).length)
   const recent = useProgress((s) => s.recent)
   const date = new Intl.DateTimeFormat('de-DE', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date())
@@ -158,7 +161,10 @@ export default function Dashboard() {
   return (
     <div className="page dash">
       <header className="dash__head">
-        <h1 className="title">{greeting()}</h1>
+        <h1 className="title">
+          {greeting()}
+          {name && `, ${name}`}
+        </h1>
         <span className="dash__date">{date}</span>
       </header>
 

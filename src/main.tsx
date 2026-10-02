@@ -10,6 +10,10 @@ import './styles/cell.css'
 import './lib/theme'
 import App from './App'
 import Intro, { introEnabled } from './intro/Intro'
+import { startProgressSync } from './auth/sync'
+
+// Angemeldet mit Blob: Lernfortschritt im Blob-Konto speichern und von dort holen
+startProgressSync()
 
 type Phase = 'intro' | 'exit' | 'done'
 

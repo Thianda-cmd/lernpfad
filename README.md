@@ -42,6 +42,12 @@ Elementdaten des Periodensystems mit PubChem (NIH) abgleichen (braucht Internet)
 npm run test:chem
 ```
 
+Den Abgleich des Fortschritts mit Blob prüfen (Zusammenführen, kaputte Daten, mehrere Geräte mit Konflikten):
+
+```bash
+npm run test:sync
+```
+
 ## Was drin ist
 
 | Bereich | Inhalt |
@@ -56,7 +62,42 @@ npm run test:chem
 | Biologie → Zellwand | als Vokabeln: Schichtbild zum Antippen, Mittellamelle / Primärwand / Sekundärwand → Bestandteile → Bausteine (z. B. Pektine aus Galacturonsäure, Rhamnose …), Bausteine mit Summenformel, Ein- und Auflagerungen, Begriffe, Zellwände anderer Lebewesen |
 | Biologie → Zellteilung | Zellzyklus als Ring, **Mitose und Meiose als Animation** (Zeitleiste, Abspielen, Schieberegler), Crossing-over sichtbar, Chromosomenzahl/Chromatiden/DNA-Gehalt je Phase, Vergleich |
 
-Einstellungen und Verlauf werden nur lokal im Browser gespeichert (`localStorage`).
+Einstellungen und Verlauf werden lokal im Browser gespeichert (`localStorage`). Wer mit Blob angemeldet ist,
+hat seinen Fortschritt zusätzlich im Blob-Konto und damit auf jedem Gerät (siehe unten).
+
+## Mit Blob anmelden
+
+Unten in der Seitenleiste (auf dem Handy oben rechts, außerdem unter Einstellungen) kann man sich mit dem
+Blob-Konto anmelden (https://blob.bojes.org). Blob öffnet sich in einem kleinen Fenster, fragt einmal nach
+Erlaubnis und schickt Name, E-Mail und Profilbild zurück. Technisch: OpenID Connect mit PKCE, Scope
+`openid profile email data offline_access`.
+
+**Fortschritt in Blob:** Angemeldet werden gelernte Organellen, Aufrufe und „Zuletzt benutzt“ im Blob-Konto
+gespeichert (Blobs Daten-API, Schlüssel `progress`). Die Seite liest weiter nur den lokalen Stand; ohne Anmeldung
+ändert sich nichts. Etwa 1,5 s nach einer Änderung wird hochgeladen; bei der Anmeldung, wenn das Fenster wieder in
+den Vordergrund kommt und alle 3 Minuten wird der Stand aus Blob geholt. Zusammengeführt wird je Organelle nach
+der neuesten Änderung (auch „nicht mehr gelernt“ überträgt sich), Aufrufe als Maximum, „Zuletzt benutzt“ nach
+dem letzten Besuch; hat ein anderes Gerät inzwischen gespeichert (409), wird neu zusammengeführt. „Verlauf
+zurücksetzen“ gilt auf allen Geräten. Zeiten mehr als einen Tag in der Zukunft gelten als „jetzt“ (ein kaputtes
+Dokument kann so nichts dauerhaft blockieren).
+
+**Geteilte Geräte (Schul-PCs):** Der lokale Stand merkt sich, wem er gehört (`owner`, die Blob-ID). Ohne Anmeldung
+Entstandenes wird beim Anmelden ins Konto übernommen; gehört er jemand anderem, wird er nicht übernommen, sondern
+durch den Stand aus Blob ersetzt. Abmelden speichert noch und nimmt den Fortschritt dann vom Gerät (in Blob bleibt
+er; ließ er sich nicht speichern, bleibt er auf dem Gerät, aber nur für dieselbe Person). Bei Blob selbst bleibt man
+angemeldet; deshalb zeigt Blob bei der nächsten Anmeldung auf diesem Gerät, mit welchem Konto es weitergeht
+(`prompt=select_account`, dort auch „anderes Konto“).
+
+- `src/auth/blob.ts`: Einstellungen, `useBlobUser()`, Anmelden/Abmelden
+- `src/auth/sync.ts`: der Abgleich im Browser (wann, Status für Kontomenü und Einstellungen)
+- `src/auth/sync-merge.ts`: Format des Dokuments und das Zusammenführen als reine Funktionen
+  (`npm run test:sync` prüft sie und spielt mehrere Geräte gegen einen Schein-Server durch)
+- `src/components/BlobAccount.tsx`: Anmelde-Knopf, Kontomenü, Speicherstand
+- `src/auth/blob-auth.js` + `.d.ts`: das SDK (Kopie von https://blob.bojes.org/sdk/blob-auth.js)
+- `public/blob-callback.html`: die Rückleitungsseite (muss in Blob als Redirect-URI eingetragen sein)
+
+Lokal gegen ein lokales Blob testen: `VITE_BLOB_ISSUER=http://localhost:3000 npm run dev`.
+Die Client-ID lässt sich mit `VITE_BLOB_CLIENT_ID` überschreiben.
 
 ## Projektstruktur
 
@@ -81,7 +122,8 @@ src/
   pages/chem/            Chemie-Seiten (Übersicht, Periodensystem, Molare Masse, Stoffmenge & Lösungen, Ionen, Ionennachweise)
   bio/division.ts        Mitose/Meiose als Schlüsselbilder (Modellzelle 2n = 4), bio/DivisionSvg.tsx zeichnet sie
   pages/bio/             Zellteilung (Zellzyklus, Mitose, Meiose, Vergleich)
-tests/                   calc.smoke.ts (alle Rechner), nachweise.check.ts, elements.check.ts
+  auth/                  Mit Blob anmelden, Fortschritt im Blob-Konto (blob.ts, sync.ts, sync-merge.ts, SDK)
+tests/                   calc.smoke.ts (alle Rechner), nachweise.check.ts, elements.check.ts, sync.smoke.ts (Abgleich)
 mathphoto/               Fotos und PDFs aus dem Unterricht (Quelle der Mathe-Beispiele)
 ```
 

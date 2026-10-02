@@ -1,14 +1,79 @@
 import { useState } from 'react'
-import { IconMoon, IconRestart, IconSun } from '../components/icons'
+import { IconMoon, IconRestart, IconSun, IconSync } from '../components/icons'
+import { Avatar, BlobSignInButton, SignInNote, SyncState } from '../components/BlobAccount'
+import { BLOB_URL, displayName, realName, useBlobUser, useSignIn } from '../auth/blob'
+import { signOut, syncNow, useSyncStatus } from '../auth/sync'
 import { useTheme, type ThemePref } from '../lib/theme'
 import { useProgress } from '../store/progress'
 import { useViewer } from '../cell3d/viewerStore'
 import { introEnabled, setIntroEnabled } from '../intro/Intro'
 
+/** Konto: mit Blob anmelden, damit der Fortschritt auf jedem Gerät da ist. */
+function Konto() {
+  const user = useBlobUser()
+  const { error } = useSignIn()
+  const { phase } = useSyncStatus()
+
+  if (!user) {
+    return (
+      <section className="settings card konto-card" aria-label="Konto">
+        <div className="settings__row">
+          <div>
+            <h3>Fortschritt auf jedem Gerät</h3>
+            <p className="muted">
+              Melde dich mit deinem Blob-Konto an, dann werden gelernte Organellen und „Zuletzt benutzt“ in deinem Konto gespeichert. Neu bei Blob? Im Anmeldefenster kannst du dir ein Konto erstellen.
+            </p>
+            {error && <SignInNote text={error} variant="card" />}
+          </div>
+          <BlobSignInButton size="lg" />
+        </div>
+      </section>
+    )
+  }
+
+  return (
+    <section className="settings card konto-card" aria-label="Konto">
+      <div className="settings__row">
+        <div className="konto-me">
+          <Avatar user={user} size={44} />
+          <div className="konto-me__who">
+            <strong>{displayName(user)}</strong>
+            {realName(user) && user.email && <span>{user.email}</span>}
+            <span>Angemeldet mit Blob</span>
+          </div>
+        </div>
+        <button className="btn btn--sm" onClick={() => void signOut()}>
+          Abmelden
+        </button>
+      </div>
+      <div className="settings__row">
+        <div>
+          <h3>Fortschritt in Blob</h3>
+          <p className="muted">
+            Gelernte Organellen und „Zuletzt benutzt“ werden jetzt in deinem Blob-Konto gespeichert und sind auf jedem Gerät da, auf dem du angemeldet bist. Beim Abmelden wird der Fortschritt von diesem Gerät entfernt, in Blob bleibt er. Bei{' '}
+            <a className="konto-link" href={BLOB_URL} target="_blank" rel="noreferrer">
+              Blob
+            </a>{' '}
+            selbst bleibst du angemeldet.
+          </p>
+          <SyncState retry={false} />
+        </div>
+        {/* Speichern nicht erlaubt oder neuere Version: Die passende Aktion steht schon beim Stand */}
+        {phase !== 'denied' && phase !== 'newer' && (
+          <button className="btn btn--sm" onClick={syncNow} disabled={phase === 'loading' || phase === 'saving'}>
+            <IconSync size={15} /> Jetzt abgleichen
+          </button>
+        )}
+      </div>
+    </section>
+  )
+}
+
 export default function Einstellungen() {
   const theme = useTheme()
   const reset = useProgress((s) => s.reset)
   const hq = useViewer((s) => s.hq)
+  const user = useBlobUser()
   const [confirm, setConfirm] = useState(false)
   const [done, setDone] = useState(false)
   const [intro, setIntro] = useState(introEnabled)
@@ -17,9 +82,11 @@ export default function Einstellungen() {
       <header className="page-head">
         <div>
           <h1>Einstellungen</h1>
-          <p>Alle Daten bleiben lokal in deinem Browser.</p>
+          <p>{user ? 'Dein Fortschritt wird in deinem Blob-Konto gespeichert. Alles andere bleibt auf diesem Gerät.' : 'Ohne Anmeldung bleiben alle Daten in deinem Browser.'}</p>
         </div>
       </header>
+
+      <Konto />
 
       <section className="settings card">
         <div className="settings__row">
@@ -73,7 +140,9 @@ export default function Einstellungen() {
         <div className="settings__row">
           <div>
             <h3>Verlauf zurücksetzen</h3>
-            <p className="muted">Löscht die als gelernt markierten Organellen und die Liste „Zuletzt benutzt“.</p>
+            <p className="muted">
+              Löscht die als gelernt markierten Organellen und die Liste „Zuletzt benutzt“{user ? ', auch in deinem Blob-Konto und auf deinen anderen Geräten' : ''}.
+            </p>
           </div>
           {confirm ? (
             <div style={{ display: 'flex', gap: 8 }}>

@@ -473,3 +473,61 @@ export const IconWall = (p: IconProps) => (
     <path d="M15.5 4.5c1.4 2.5 1.4 5 0 7.5s-1.4 5 0 7.5M19.5 4.5c1.4 2.5 1.4 5 0 7.5s-1.4 5 0 7.5" opacity=".7" />
   </Icon>
 )
+
+/* ---------- Konto (Blob) ---------- */
+
+export const IconCloudCheck = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M7.2 18.5h9.6a4 4 0 0 0 .6-7.95A5.6 5.6 0 0 0 6.6 9.3 4.6 4.6 0 0 0 7.2 18.5Z" />
+    <path d="m9.6 13.6 1.8 1.8 3.4-3.6" />
+  </Icon>
+)
+
+export const IconCloudUp = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M7.2 18.5h9.6a4 4 0 0 0 .6-7.95A5.6 5.6 0 0 0 6.6 9.3 4.6 4.6 0 0 0 7.2 18.5Z" />
+    <path d="M12 16v-4.6M9.9 13.4 12 11.3l2.1 2.1" />
+  </Icon>
+)
+
+export const IconCloudOff = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M9.4 18.5h7.4a4 4 0 0 0 2.2-.66M19.9 14.9a4 4 0 0 0-2.5-4.35A5.6 5.6 0 0 0 9.3 6.6M6.4 8.6a4.6 4.6 0 0 0 .8 9.9" />
+    <path d="m4 4 16 16" />
+  </Icon>
+)
+
+export const IconAlert = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="12" cy="12" r="8.4" />
+    <path d="M12 7.8v5" />
+    <circle cx="12" cy="16.1" r="0.6" fill="currentColor" stroke="none" />
+  </Icon>
+)
+
+export const IconSync = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M19.2 12a7.2 7.2 0 0 1-12.6 4.8M4.8 12a7.2 7.2 0 0 1 12.6-4.8" />
+    <path d="M17.6 3.9v3.6H14M6.4 20.1v-3.6H10" />
+  </Icon>
+)
+
+export const IconExternal = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M13.5 4.8h5.7v5.7M19.2 4.8l-8 8" />
+    <path d="M17.4 13.8v4.1a1.3 1.3 0 0 1-1.3 1.3H6.1a1.3 1.3 0 0 1-1.3-1.3V7.9a1.3 1.3 0 0 1 1.3-1.3h4.1" />
+  </Icon>
+)
+
+export const IconLogout = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M10 19.2H6.4a1.6 1.6 0 0 1-1.6-1.6V6.4a1.6 1.6 0 0 1 1.6-1.6H10" />
+    <path d="M15.2 16.2 19.4 12l-4.2-4.2M19.4 12H9.6" />
+  </Icon>
+)
+
+export const IconUpDown = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="m8.4 9.4 3.6-3.6 3.6 3.6M8.4 14.6l3.6 3.6 3.6-3.6" />
+  </Icon>
+)

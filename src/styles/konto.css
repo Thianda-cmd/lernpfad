@@ -1,0 +1,638 @@
+/* ==========================================================================
+   Konto: „Mit Blob anmelden“ und der Speicherstand in Blob
+   Der Anmelde-Knopf bleibt in Blobs Lila mit dem Maskottchen, damit man ihn wiedererkennt;
+   alles andere nutzt Tannengrün und Sand.
+   ========================================================================== */
+
+.blob-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  height: 40px;
+  padding: 0 16px 0 12px;
+  border: 0;
+  border-radius: 10px;
+  background: #6d3df5;
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  white-space: nowrap;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.25), 0 1px 2px rgb(0 0 0 / 0.12);
+  transition: background 0.15s, transform 0.1s;
+}
+
+.blob-btn:hover {
+  background: #5326d6;
+}
+
+.blob-btn:active {
+  transform: scale(0.97);
+}
+
+.blob-btn:focus-visible {
+  outline: 2px solid #b9a2ff;
+  outline-offset: 2px;
+}
+
+.blob-btn--lg {
+  height: 44px;
+  padding: 0 18px 0 14px;
+  border-radius: 12px;
+  font-size: 15px;
+  gap: 10px;
+}
+
+.blob-btn--sm {
+  height: 34px;
+  padding: 0 12px 0 9px;
+  border-radius: 9px;
+  font-size: 13px;
+  gap: 7px;
+}
+
+.blob-btn--compact {
+  width: 44px;
+  padding: 0;
+}
+
+/* Kopfzeile auf sehr schmalen Handys: nur das Maskottchen, damit der Seitenpfad Platz hat */
+@media (max-width: 480px) {
+  .blob-btn--narrow {
+    width: 34px;
+    padding: 0;
+  }
+
+  .blob-btn--narrow .blob-btn__label {
+    display: none;
+  }
+}
+
+.blob-btn .blob-mark {
+  flex: none;
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.15));
+  transition: transform 0.25s;
+}
+
+.blob-btn:hover .blob-mark {
+  transform: translateY(-1px) rotate(-6deg);
+}
+
+.blob-btn.is-waiting .blob-mark {
+  animation: blob-hop 0.9s ease-in-out infinite;
+}
+
+@keyframes blob-hop {
+  0%,
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+  40% {
+    transform: translateY(-3px) scale(0.95, 1.06);
+  }
+  70% {
+    transform: translateY(0) scale(1.06, 0.94);
+  }
+}
+
+/* ---------- Seitenleiste ---------- */
+
+.konto {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sidebar .blob-btn {
+  width: 100%;
+}
+
+/* Fehler oder Hinweis zur Anmeldung, zum Wegklicken */
+.konto__note {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--sand-2);
+}
+
+.konto__note p {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+
+.konto__note-close {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin: -2px -2px 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-3);
+  transition: background 0.15s, color 0.15s;
+}
+
+.konto__note-close:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.konto__note--inline {
+  padding: 0 4px;
+}
+
+.konto__note--card {
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+/* oben über der Seite (Handy) und neben der eingeklappten Seitenleiste */
+.konto__note--toast,
+.konto__note--rail {
+  position: fixed;
+  z-index: 50;
+  padding: 11px 10px 11px 14px;
+  border: 1px solid var(--line-2);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  font-size: 13px;
+  animation: konto-pop-in 0.16s ease-out;
+}
+
+.konto__note--toast {
+  top: 68px;
+  left: 14px;
+  right: 14px;
+}
+
+/* Bei offener Seitenleiste steht der Hinweis schon unter ihrem Anmelde-Knopf */
+.app.nav-open .konto__note--toast {
+  display: none;
+}
+
+.konto__note--rail {
+  left: calc(var(--rail-w) + 10px);
+  bottom: 16px;
+  width: min(340px, calc(100vw - var(--rail-w) - 26px));
+}
+
+.konto__me {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 8px 6px 6px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.konto__me:hover,
+.konto__me.is-open {
+  background: var(--surface-2);
+  border-color: var(--line);
+}
+
+.konto__who {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.konto__who strong {
+  font-size: 13.5px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.konto__state {
+  font-size: 12px;
+  color: var(--text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.konto__state--warn {
+  color: var(--sand-2);
+}
+
+.konto__chev {
+  flex: none;
+  color: var(--text-3);
+}
+
+/* kurze Beschriftung nur, wenn es eng wird (unten) */
+.blob-btn__label--short {
+  display: none;
+}
+
+/* Niedrige Laptop-Bildschirme (z. B. 1366 × 768): Konto und die beiden Symbole in einer Reihe,
+   damit die Navigation nicht hinter den Rand rutscht */
+@media (min-width: 961px) and (max-height: 820px) {
+  .app:not(.is-collapsed) .sidebar__footer {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px 6px;
+  }
+
+  .app:not(.is-collapsed) .sidebar__footer .mini-progress {
+    grid-column: 1 / -1;
+  }
+
+  .app:not(.is-collapsed) .sidebar__actions {
+    gap: 0;
+  }
+
+  .app:not(.is-collapsed) .sidebar .blob-btn {
+    height: 36px;
+  }
+
+  .app:not(.is-collapsed) .sidebar .blob-btn__label {
+    display: none;
+  }
+
+  .app:not(.is-collapsed) .sidebar .blob-btn__label--short {
+    display: inline;
+  }
+
+  .app:not(.is-collapsed) .konto__me {
+    padding: 2px 6px 2px 2px;
+  }
+
+  .app:not(.is-collapsed) .konto__chev {
+    display: none;
+  }
+}
+
+/* eingeklappt: nur Maskottchen bzw. Avatar, Name als Hinweis daneben */
+.app.is-collapsed .sidebar .blob-btn {
+  width: 44px;
+  padding: 0;
+  margin: 0 auto;
+}
+
+.app.is-collapsed .konto__me {
+  justify-content: center;
+  width: 44px;
+  margin: 0 auto;
+  padding: 5px;
+}
+
+.app.is-collapsed .konto__who,
+.app.is-collapsed .konto__chev {
+  display: none;
+}
+
+.app.is-collapsed .konto [data-label]:hover::after {
+  content: attr(data-label);
+  position: fixed;
+  left: calc(var(--rail-w) + 6px);
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: var(--text);
+  color: var(--bg);
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 60;
+}
+
+.app.is-collapsed .konto__me.is-open::after {
+  display: none;
+}
+
+/* ---------- Avatar ---------- */
+
+.avatar {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  border-radius: 50%;
+}
+
+.avatar img,
+.avatar__initial {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.avatar img {
+  object-fit: cover;
+}
+
+.avatar__initial {
+  display: grid;
+  place-items: center;
+  background: var(--green);
+  color: var(--green-ink);
+  font-weight: 650;
+  line-height: 1;
+}
+
+.avatar__dot {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid var(--surface);
+  background: var(--text-3);
+}
+
+.konto__me:hover .avatar__dot,
+.konto__me.is-open .avatar__dot {
+  border-color: var(--surface-2);
+}
+
+.avatar__dot--ok {
+  background: var(--green);
+}
+
+.avatar__dot--busy {
+  background: var(--sand);
+  animation: konto-pulse 1.2s ease-in-out infinite;
+}
+
+.avatar__dot--warn {
+  background: var(--sand-2);
+}
+
+@keyframes konto-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* ---------- Kontomenü ---------- */
+
+.konto-pop {
+  position: fixed;
+  z-index: 70;
+  padding: 6px;
+  border: 1px solid var(--line-2);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow), 0 18px 48px -20px rgba(0, 0, 0, 0.38);
+  outline: none;
+  animation: konto-pop-in 0.16s ease-out;
+}
+
+.konto-pop--top {
+  transform-origin: 50% 100%;
+}
+
+.konto-pop--right {
+  transform-origin: 0 100%;
+}
+
+.konto-pop--bottom {
+  transform-origin: 100% 0;
+}
+
+@keyframes konto-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+.konto-pop__head {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 10px 12px;
+}
+
+.konto-pop__who {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.konto-pop__who strong {
+  font-size: 14px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.konto-pop__who span {
+  font-size: 12.5px;
+  color: var(--text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.konto-pop__sync {
+  margin: 0 2px 6px;
+  padding: 11px 12px;
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+
+.konto-pop__list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.konto-pop__list a,
+.konto-pop__list button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-2);
+  font-size: 13.5px;
+  font-weight: 500;
+  text-align: left;
+  transition: background 0.15s, color 0.15s;
+}
+
+.konto-pop__list a:hover,
+.konto-pop__list button:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.konto-pop__foot {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 4px;
+  padding: 9px 10px 4px;
+  border-top: 1px solid var(--line);
+  font-size: 11.5px;
+  color: var(--text-3);
+}
+
+/* ---------- Speicherstand ---------- */
+
+.sync {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.sync__icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  margin-top: 1px;
+  color: var(--text-3);
+}
+
+.sync--ok .sync__icon {
+  color: var(--green);
+}
+
+.sync--busy .sync__icon {
+  color: var(--sand);
+  animation: konto-pulse 1.2s ease-in-out infinite;
+}
+
+.sync--warn .sync__icon {
+  color: var(--sand-2);
+}
+
+.sync__text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.sync__text strong {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.sync__text > span {
+  margin-top: 1px;
+  font-size: 12.5px;
+  color: var(--text-3);
+}
+
+.sync__action {
+  margin-top: 9px;
+}
+
+/* ---------- Kopfzeile (schmale Bildschirme) ---------- */
+
+.topbar__konto {
+  display: none;
+}
+
+.konto__avatar-btn {
+  display: grid;
+  place-items: center;
+  padding: 3px;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  background: transparent;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.konto__avatar-btn:hover,
+.konto__avatar-btn.is-open {
+  background: var(--surface-2);
+  border-color: var(--line);
+}
+
+.konto__avatar-btn .avatar__dot {
+  border-color: var(--bg);
+}
+
+@media (max-width: 960px) {
+  .topbar__konto {
+    display: flex;
+    align-items: center;
+  }
+
+  /* Neben dem Konto-Knopf wird es eng: die oberen Ebenen kürzen, die aktuelle Seite bleibt lesbar */
+  .crumbs a {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .crumbs__current {
+    flex: 0 0 auto;
+    max-width: 100%;
+  }
+}
+
+/* ---------- Einstellungen ---------- */
+
+.konto-card {
+  margin-bottom: 16px;
+}
+
+.konto-me {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.konto-me__who {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.konto-me__who strong {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.konto-me__who span {
+  font-size: 13px;
+  color: var(--text-3);
+  overflow-wrap: anywhere;
+}
+
+.settings__row .sync {
+  margin-top: 12px;
+}
+
+.konto-link {
+  color: var(--text-2);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.konto-link:hover {
+  color: var(--text);
+}
