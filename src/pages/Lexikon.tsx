@@ -123,7 +123,7 @@ export default function Lexikon() {
       {openId && (
         <div className="drawer" role="dialog" aria-modal="true" aria-label={ORGANELLES[openId].name}>
           <div className="drawer__backdrop" onClick={() => setParams({}, { replace: true })} />
-          <aside className="drawer__panel">
+          <aside className={`drawer__panel ${openId === 'zellwand' ? 'drawer__panel--wide' : ''}`}>
             <div className="panel__head" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px' }}>
               <span className="faint" style={{ fontSize: 13, fontWeight: 600 }}>
                 Organellen-Lexikon

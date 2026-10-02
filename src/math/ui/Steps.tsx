@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Rich, Tex } from '../tex'
-import type { Step } from '../types'
+import type { Step } from '../alg/step'
 
 function Row({ s, i }: { s: Step; i: number }) {
   return (
-    <li className="steps__row" style={{ animationDelay: `${Math.min(i, 6) * 40}ms` }}>
+    <li className={`steps__row ${s.final ? 'is-final' : ''}`} style={{ animationDelay: `${Math.min(i, 8) * 35}ms` }}>
+      {s.head && <div className="steps__head">{s.head}</div>}
       <div className="steps__line">
         <span className="steps__tex">
           <Tex d>{s.tex}</Tex>

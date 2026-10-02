@@ -18,7 +18,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error('LernLabor-Fehler:', error, info.componentStack)
+    console.error('Lernpfad-Fehler:', error, info.componentStack)
   }
 
   reset = () => this.setState({ error: null })

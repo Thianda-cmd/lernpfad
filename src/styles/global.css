@@ -1,5 +1,5 @@
 /* ==========================================================================
-   LernLabor – Design-System
+   Lernpfad – Design-System
    Zwei matte Farben: Tannengrün (--green) und Sand (--sand) auf warmen Neutraltönen.
    ========================================================================== */
 
@@ -310,6 +310,30 @@ ol {
   white-space: nowrap;
 }
 
+.nav__section--link {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  transition: color 0.15s;
+}
+
+.nav__section--link svg {
+  opacity: 0;
+  transform: translateX(-3px);
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.nav__section--link:hover,
+.nav__section--link.is-active {
+  color: var(--green);
+}
+
+.nav__section--link:hover svg,
+.nav__section--link.is-active svg {
+  opacity: 1;
+  transform: none;
+}
+
 .nav__link {
   position: relative;
   display: flex;
@@ -408,6 +432,10 @@ ol {
 .app.is-collapsed .nav__section {
   font-size: 0;
   padding: 10px 0 6px;
+}
+
+.app.is-collapsed .nav__section svg {
+  display: none;
 }
 
 .app.is-collapsed .nav__section::after {

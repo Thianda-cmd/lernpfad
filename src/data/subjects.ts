@@ -1,3 +1,5 @@
+import { MATH_TOOLS } from '../math/tools'
+
 export type SubjectId = 'biologie' | 'chemie' | 'mathematik'
 
 export interface Module {
@@ -26,7 +28,7 @@ export const SUBJECTS: Subject[] = [
     id: 'biologie',
     name: 'Biologie',
     kurz: 'Bio',
-    beschreibung: 'Zellbiologie in 3D, Mitose und Meiose, Lexikon, Karteikarten und Quiz.',
+    beschreibung: 'Zellen in 3D, Organellen-Lexikon, Zellwand-Vokabeln, Mitose und Meiose.',
     farbe: 'var(--bio)',
     soft: 'var(--bio-soft)',
     pfad: '/biologie',
@@ -35,10 +37,10 @@ export const SUBJECTS: Subject[] = [
       {
         id: 'zellbiologie',
         titel: 'Zellbiologie',
-        beschreibung: 'Tier- und Pflanzenzelle in 3D und 2D, alle Organellen, Vergleich, Karteikarten, Quiz.',
+        beschreibung: 'Tier- und Pflanzenzelle in 3D und 2D, alle Organellen, Zellwand-Vokabeln und Vergleich.',
         status: 'verfuegbar',
         pfad: '/biologie/zellbiologie',
-        themen: ['Tierzelle 3D/2D', 'Pflanzenzelle 3D/2D', 'Organellen-Lexikon', 'Vergleich', 'Quiz & Karteikarten'],
+        themen: ['Tierzelle 3D/2D', 'Pflanzenzelle 3D/2D', 'Organellen-Lexikon', 'Zellwand', 'Vergleich'],
       },
       {
         id: 'mikroskopie',
@@ -50,7 +52,7 @@ export const SUBJECTS: Subject[] = [
       {
         id: 'zellteilung',
         titel: 'Zellzyklus & Zellteilung',
-        beschreibung: 'Zellzyklus, Mitose und Meiose als Animation – mit Chromosomenzahlen und Quiz.',
+        beschreibung: 'Zellzyklus, Mitose und Meiose als Animation – mit Chromosomenzahlen je Phase.',
         status: 'verfuegbar',
         pfad: '/biologie/zellteilung',
         themen: ['Zellzyklus', 'Mitose', 'Meiose'],
@@ -82,7 +84,7 @@ export const SUBJECTS: Subject[] = [
     id: 'chemie',
     name: 'Chemie',
     kurz: 'Chem',
-    beschreibung: 'Periodensystem, molare Masse, Salzformeln und Ionennachweise.',
+    beschreibung: 'Periodensystem, molare Masse, Stoffmenge & Lösungen, Salzformeln und Ionennachweise.',
     farbe: 'var(--chem)',
     soft: 'var(--chem-soft)',
     pfad: '/chemie',
@@ -91,9 +93,10 @@ export const SUBJECTS: Subject[] = [
       { id: 'pse', titel: 'Periodensystem', beschreibung: 'Alle 118 Elemente mit Schalenmodell, Orbitalen, Stoffdaten, 3D-Ansicht und Quiz.', status: 'verfuegbar', pfad: '/chemie/periodensystem', themen: [] },
       { id: 'molmasse', titel: 'Molare Masse', beschreibung: 'Formeln auswerten und umrechnen.', status: 'verfuegbar', pfad: '/chemie/molmasse', themen: [] },
       { id: 'ionen', titel: 'Ionen & Salzformeln', beschreibung: 'Salze bilden und benennen.', status: 'verfuegbar', pfad: '/chemie/ionen', themen: [] },
+      { id: 'rechnen', titel: 'Stoffmenge & Lösungen', beschreibung: 'n, m, M, N – Lösungen ansetzen, verdünnen und mischen, mit Rechenweg.', status: 'verfuegbar', pfad: '/chemie/rechnen', themen: [] },
       { id: 'nachweise', titel: 'Ionennachweise', beschreibung: 'Fällungen, Gasnachweise und Flammenfärbung mit Reaktionsgleichung.', status: 'verfuegbar', pfad: '/chemie/nachweise', themen: [] },
       { id: 'bindung', titel: 'Chemische Bindung', beschreibung: 'Ionenbindung, Atombindung, Metallbindung und zwischenmolekulare Kräfte.', status: 'geplant', themen: [] },
-      { id: 'stoechiometrie', titel: 'Stoffmenge & Stöchiometrie', beschreibung: 'Mol, molare Masse und Reaktionsgleichungen.', status: 'geplant', themen: [] },
+      { id: 'stoechiometrie', titel: 'Stöchiometrie', beschreibung: 'Reaktionsgleichungen ausgleichen und Umsätze berechnen.', status: 'geplant', themen: [] },
       { id: 'saeuren', titel: 'Säuren, Basen & pH-Wert', beschreibung: 'Protolyse, pH-Berechnung, Puffer und Titration.', status: 'geplant', themen: [] },
       { id: 'redox', titel: 'Redoxreaktionen', beschreibung: 'Oxidationszahlen, Redoxgleichungen und Elektrochemie.', status: 'geplant', themen: [] },
       { id: 'organik', titel: 'Organische Chemie', beschreibung: 'Stoffklassen, funktionelle Gruppen und Biomoleküle.', status: 'geplant', themen: [] },
@@ -103,17 +106,13 @@ export const SUBJECTS: Subject[] = [
     id: 'mathematik',
     name: 'Mathematik',
     kurz: 'Mathe',
-    beschreibung: 'Algebra, chemisches Rechnen, Gleichungssysteme und p-q-Formel.',
+    beschreibung: 'Rechner mit vollständigem Lösungsweg: Terme, Gleichungen, p-q-Formel, Gleichungssysteme, Brüche, Potenzen, Formeln, Prozent und Geraden.',
     farbe: 'var(--math)',
     soft: 'var(--math-soft)',
     pfad: '/mathematik',
     status: 'aktiv',
     module: [
-      { id: 'lf1t', titel: 'LF 1T · Grundlagen', beschreibung: 'Klammern, Ausmultiplizieren, Gleichungen, Brüche, Potenzen, Formeln, Prozent.', status: 'verfuegbar', pfad: '/mathematik', themen: [] },
-      { id: 'chem', titel: 'Chemisches Rechnen', beschreibung: 'Stoffmenge, Masse, molare Masse, Teilchenzahl und Anteile.', status: 'verfuegbar', pfad: '/mathematik/stoffmenge', themen: [] },
-      { id: 'mfh', titel: 'MFH', beschreibung: 'Lineare Gleichungssysteme, Textaufgaben, p-q-Formel und Geraden.', status: 'verfuegbar', pfad: '/mathematik/lgs', themen: [] },
-      { id: 'konzentration', titel: 'Konzentrationsangaben', beschreibung: 'Massenkonzentration und Stoffmengenkonzentration.', status: 'geplant', themen: [] },
-      { id: 'verduennung', titel: 'Verdünnen & Mischen', beschreibung: 'Verdünnungsreihen, Mischungsrechnen und Mischungskreuz.', status: 'geplant', themen: [] },
+      ...MATH_TOOLS.map((t) => ({ id: t.id, titel: t.title, beschreibung: t.short, status: 'verfuegbar' as const, pfad: t.path, themen: [] })),
       { id: 'statistik', titel: 'Statistik & Auswertung', beschreibung: 'Mittelwert, Standardabweichung und Kalibriergeraden.', status: 'geplant', themen: [] },
     ],
   },

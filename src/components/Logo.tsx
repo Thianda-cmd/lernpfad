@@ -1,7 +1,7 @@
 import { useId } from 'react'
 
 /**
- * Bildmarke „LernLabor“: eine geöffnete Zellmembran mit Zellkern und Nucleolus,
+ * Bildmarke „Lernpfad“: eine geöffnete Zellmembran mit Zellkern und Nucleolus,
  * aus der ein Vesikel austritt (Exocytose – Wissen, das nach außen geht).
  */
 export const LOGO_RING = 'M31.18 39.41 A17 17 0 1 1 39.41 31.18'

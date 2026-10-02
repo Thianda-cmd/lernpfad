@@ -50,13 +50,13 @@ export interface Nachweis {
   short: string
   steps: Step[]
   eq: string[]
-  /** eindeutiges Ergebnis (auch für das Quiz) */
+  /** eindeutiges Ergebnis */
   result: string
   swatch: string
   notes?: Note[]
-  /** Säure, mit der angesäuert wird (Quiz) */
+  /** Säure, mit der angesäuert wird */
   acid?: string
-  /** Nachweisreagenz (Quiz) */
+  /** Nachweisreagenz */
   reagentName: string
 }
 

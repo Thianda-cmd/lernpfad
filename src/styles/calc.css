@@ -1,0 +1,812 @@
+/* ==========================================================================
+   Rechner – Eingabe, Ergebnis, Lösungsweg, Koordinatensystem
+   ========================================================================== */
+
+.tex .katex {
+  font-size: 1.08em;
+}
+
+.tex--block {
+  display: block;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 0;
+  scrollbar-width: thin;
+}
+
+.tex--block .katex-display {
+  margin: 0;
+  text-align: left;
+}
+
+.tex--block .katex-display > .katex {
+  text-align: left;
+}
+
+kbd {
+  display: inline-block;
+  padding: 0 5px;
+  border-radius: 5px;
+  border: 1px solid var(--line-2);
+  border-bottom-width: 2px;
+  background: var(--surface);
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+/* ---------------------------- Seitenaufbau ---------------------------- */
+
+.calc .page-head {
+  align-items: flex-start;
+}
+
+.calc__seg {
+  flex-wrap: wrap;
+}
+
+.calc__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 16px;
+  align-items: start;
+}
+
+.calc__in {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+}
+
+.calc__label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.calc__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.calc__hint {
+  font-size: 12.5px;
+  color: var(--text-3);
+  line-height: 1.8;
+}
+
+.calc__ex {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.calc__ex-k {
+  font-size: 12px;
+  color: var(--text-3);
+  margin-right: 4px;
+}
+
+.calc__chip {
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 12.5px;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.calc__chip:hover {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+.calc__chip.is-on {
+  border-color: color-mix(in srgb, var(--green) 45%, transparent);
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.calc__var {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.seg--wrap {
+  flex-wrap: wrap;
+}
+
+.calc__formula {
+  padding: 4px 2px;
+  font-size: 18px;
+}
+
+/* Zahlenfelder */
+.calc__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 12px;
+}
+
+.calc__fields--pt {
+  grid-template-columns: repeat(2, minmax(0, 160px));
+}
+
+.nf {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.nf__label {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 550;
+  color: var(--text-2);
+}
+
+.nf__label small {
+  font-size: 11.5px;
+  font-weight: 450;
+  color: var(--text-3);
+}
+
+.nf__row {
+  display: flex;
+  align-items: stretch;
+  height: 42px;
+  border-radius: 10px;
+  border: 1px solid var(--line-2);
+  background: var(--bg);
+  overflow: hidden;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+.nf__row:focus-within {
+  background: var(--surface);
+  border-color: color-mix(in srgb, var(--green) 55%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--green) 12%, transparent);
+}
+
+.nf__input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  padding: 0 12px;
+  background: transparent;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  outline: none;
+}
+
+.nf__input--formula {
+  font-family: var(--font-mono);
+  font-size: 14.5px;
+}
+
+.nf__u,
+.nf__unit {
+  display: grid;
+  place-items: center;
+  padding: 0 10px;
+  border: 0;
+  border-left: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 550;
+  white-space: nowrap;
+}
+
+.nf__unit {
+  cursor: pointer;
+  outline: none;
+}
+
+/* Regeln */
+.calc__rules {
+  padding: 18px 18px 14px;
+}
+
+.calc__rules h3 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 21px;
+  margin-bottom: 10px;
+}
+
+.calc__rules dl {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.calc__rules dl > div {
+  padding: 9px 0;
+  border-top: 1px solid var(--line);
+}
+
+.calc__rules dt {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.calc__rules dd {
+  margin: 3px 0 0;
+  font-size: 12.5px;
+  color: var(--text-3);
+}
+
+/* ---------------------------- Ergebnis ---------------------------- */
+
+.calc__out {
+  margin-top: 16px;
+  overflow: hidden;
+}
+
+.calc__out--empty,
+.calc__out--err {
+  padding: 22px 24px;
+  color: var(--text-3);
+  font-size: 14px;
+}
+
+.calc__out--err {
+  border-color: color-mix(in srgb, var(--sand) 55%, transparent);
+  background: color-mix(in srgb, var(--sand-soft) 70%, var(--surface));
+  color: var(--sand-2);
+}
+
+.calc__res {
+  padding: 20px 24px 18px;
+  background: color-mix(in srgb, var(--green-soft) 65%, var(--surface));
+  border-bottom: 1px solid var(--line);
+}
+
+.calc__res-k {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--green);
+}
+
+.calc__res-v {
+  margin-top: 6px;
+  font-size: 1.32em;
+  color: var(--text);
+}
+
+.calc__res-x {
+  margin-top: 4px;
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.calc__remark {
+  margin-top: 10px;
+  font-size: 13.5px;
+  color: var(--text-2);
+}
+
+.calc__way {
+  padding: 18px 24px 22px;
+}
+
+.calc__way-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.calc__way-head h2 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 24px;
+}
+
+.calc__way-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.switch--sm {
+  font-size: 13px;
+}
+
+/* Lösungsweg */
+.steps {
+  margin-top: 8px;
+}
+
+.steps__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.steps__row {
+  padding: 9px 0;
+  border-bottom: 1px dashed var(--line-2);
+  animation: step-in 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.steps__row:last-child {
+  border-bottom: 0;
+}
+
+.steps__row.is-final .steps__tex {
+  color: var(--green);
+}
+
+.steps__row.is-final .steps__tex .katex {
+  font-weight: 500;
+}
+
+@keyframes step-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+.steps__head {
+  margin: 10px 0 6px;
+  font-size: 11.5px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sand-2);
+}
+
+.steps__row:first-child .steps__head {
+  margin-top: 0;
+}
+
+.steps__line {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.steps__tex {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 3px 0;
+  scrollbar-width: thin;
+}
+
+.steps__tex .katex {
+  font-size: 1.1em;
+}
+
+.steps__op {
+  flex: none;
+  padding-left: 12px;
+  border-left: 1.5px solid var(--sand);
+  color: var(--sand-2);
+  white-space: nowrap;
+}
+
+.steps__note {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.55;
+  max-width: 760px;
+}
+
+.steps__ctrl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.steps__count {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------- Eingabefeld für Terme ---------------------------- */
+
+.mi {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.mi__field {
+  height: 46px;
+  width: 100%;
+  padding: 0 14px;
+  border-radius: 11px;
+  border: 1px solid var(--line-2);
+  background: var(--bg);
+  font-size: 16px;
+  font-family: var(--font-mono);
+  letter-spacing: 0;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+.mi--lg .mi__field {
+  height: 52px;
+  font-size: 17px;
+}
+
+.mi--sm .mi__field {
+  height: 38px;
+  font-size: 14px;
+}
+
+.mi__field:focus {
+  background: var(--surface);
+  border-color: color-mix(in srgb, var(--green) 55%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--green) 12%, transparent);
+}
+
+.mi.is-ok .mi__field {
+  border-color: var(--green);
+}
+
+.mi.is-bad .mi__field {
+  border-color: var(--sand);
+}
+
+.mi__keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.mi__key {
+  height: 30px;
+  min-width: 36px;
+  padding: 0 8px;
+  border-radius: 7px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  font-size: 13.5px;
+  color: var(--text-2);
+  transition: background 0.15s, color 0.15s;
+}
+
+.mi__key:hover {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+.mi__preview {
+  min-height: 34px;
+  padding: 6px 12px;
+  border-radius: 9px;
+  background: var(--surface-2);
+  color: var(--text);
+  overflow-x: auto;
+  overflow-y: hidden;
+  font-size: 15px;
+}
+
+.mi__preview.is-error {
+  color: var(--text-3);
+  font-size: 12.5px;
+}
+
+.mi__preview::before {
+  content: 'So liest der Rechner deine Eingabe:  ';
+  display: block;
+  font-size: 10.5px;
+  color: var(--text-3);
+  letter-spacing: 0.04em;
+  margin-bottom: 2px;
+}
+
+/* ---------------------------- Koordinatensystem ---------------------------- */
+
+.calc__fig {
+  display: flex;
+  gap: 22px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  padding: 18px 24px 4px;
+  border-bottom: 1px solid var(--line);
+}
+
+.graph {
+  flex: 0 1 360px;
+  min-width: 240px;
+}
+
+.calc__figcap {
+  flex: 1 1 220px;
+  font-size: 13.5px;
+  color: var(--text-2);
+  align-self: center;
+}
+
+.calc__figinfo {
+  flex: 1 1 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  align-self: center;
+}
+
+.calc__figinfo > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 9px 0;
+  border-top: 1px solid var(--line);
+}
+
+.calc__figinfo > div:first-child {
+  border-top: 0;
+}
+
+.calc__figinfo > div > span:first-child {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.plot {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  touch-action: none;
+}
+
+.plot__grid {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.plot__axis {
+  stroke: var(--text-3);
+  stroke-width: 1.2;
+}
+
+.plot__arrowhead {
+  fill: var(--text-3);
+}
+
+.plot__tick {
+  font-size: 9px;
+  fill: var(--text-3);
+  font-family: var(--font);
+}
+
+.plot__axis-label {
+  font-size: 12px;
+  fill: var(--text-2);
+  font-style: italic;
+  font-family: var(--font-serif);
+}
+
+.plot__line {
+  stroke: var(--green);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+}
+
+.plot__line--2 {
+  stroke: var(--sand);
+}
+
+.plot__curve {
+  fill: none;
+  stroke: var(--green);
+  stroke-width: 2.2;
+  stroke-linejoin: round;
+}
+
+.plot__pt {
+  fill: var(--surface);
+  stroke: var(--green);
+  stroke-width: 2;
+}
+
+.plot__pt--hot {
+  fill: var(--green);
+  stroke: var(--surface);
+}
+
+.plot__label {
+  font-size: 11px;
+  font-weight: 600;
+  fill: var(--text);
+  font-family: var(--font);
+  paint-order: stroke;
+  stroke: var(--surface);
+  stroke-width: 3px;
+}
+
+/* ---------------------------- Werte einsetzen ---------------------------- */
+
+.calc__insert {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.calc__insert h3 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 21px;
+}
+
+.calc__insert-res {
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  font-size: 1.05em;
+}
+
+.calc__insert-err,
+.calc__insert-hint {
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+/* ---------------------------- Übersicht ---------------------------- */
+
+.calcgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 14px;
+}
+
+.calctile {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px;
+}
+
+.calctile__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.calctile__icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  color: var(--green);
+  background: var(--green-soft);
+}
+
+.calctile__sig {
+  color: var(--text-3);
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.calctile h3 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 23px;
+  line-height: 1.1;
+}
+
+.calctile p {
+  font-size: 13.5px;
+  color: var(--text-2);
+  flex: 1;
+}
+
+.calctile__cta {
+  margin-top: 4px;
+  font-size: 13.5px;
+}
+
+.calcwide {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+}
+
+.calcwide__text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.calcwide__text strong {
+  font-weight: 600;
+}
+
+.calcwide__text span {
+  font-size: 13.5px;
+  color: var(--text-2);
+}
+
+.calcwide__arrow {
+  color: var(--text-3);
+}
+
+/* ---------------------------- Responsive ---------------------------- */
+
+@media (max-width: 1100px) {
+  .calc__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .calc__rules dl {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    column-gap: 18px;
+  }
+}
+
+@media (max-width: 640px) {
+  .calc__in {
+    padding: 16px;
+  }
+  .calc__res,
+  .calc__way,
+  .calc__fig,
+  .calc__insert {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .steps__line {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  .steps__op {
+    padding-left: 8px;
+  }
+  .calc__fields--pt {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .calcwide__sig {
+    display: none;
+  }
+}

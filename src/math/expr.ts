@@ -12,12 +12,12 @@ export type Node =
   | { t: 'div'; a: Node; b: Node }
   | { t: 'pow'; a: Node; b: Node }
   | { t: 'root'; a: Node; n: number }
-  | { t: 'group'; a: Node }
+  | { t: 'group'; a: Node; sq?: boolean }
 
 type Tok =
   | { k: 'num'; v: number; raw: string }
   | { k: 'id'; v: string }
-  | { k: 'op'; v: string }
+  | { k: 'op'; v: string; raw?: string }
   | { k: 'fn'; v: 'sqrt' | 'cbrt' }
   | { k: 'sup'; v: number }
 
@@ -96,9 +96,9 @@ function tokenize(src: string, sci: boolean): Tok[] {
       continue
     }
     const rest = s.slice(i).toLowerCase()
-    const fn = ['sqrt', 'wurzel'].find((w) => rest.startsWith(w))
+    const fn = ['sqrt', 'wurzel', 'cbrt'].find((w) => rest.startsWith(w))
     if (fn) {
-      out.push({ k: 'fn', v: 'sqrt' })
+      out.push({ k: 'fn', v: fn === 'cbrt' ? 'cbrt' : 'sqrt' })
       i += fn.length
       continue
     }
@@ -121,7 +121,7 @@ function tokenize(src: string, sci: boolean): Tok[] {
       continue
     }
     if (OPS[c]) {
-      out.push({ k: 'op', v: OPS[c] })
+      out.push({ k: 'op', v: OPS[c], raw: c })
       i++
       continue
     }
@@ -227,7 +227,7 @@ class Parser {
       const inner = this.expr()
       if (!this.isOp(')')) throw new ParseError('Klammer wird nicht geschlossen')
       this.next()
-      return { t: 'group', a: inner }
+      return { t: 'group', a: inner, sq: t.raw === '[' }
     }
     if (t.k === 'sup') throw new ParseError('Hochzahl ohne Basis')
     throw new ParseError(t.k === 'op' && t.v === ')' ? 'Zu viele schließende Klammern' : 'Unerwartetes Rechenzeichen')
@@ -358,7 +358,7 @@ export function hasRoot(n: Node): boolean {
 /* ---------------------------- TeX-Ausgabe ---------------------------- */
 
 function numTex(n: { v: number; raw: string }) {
-  if (n.raw === 'π') return '\\pi'
+  if (n.raw === 'π') return '\\pi '
   if (/e/i.test(n.raw)) {
     const [m, e] = n.raw.split(/e/i)
     return `${m.replace('.', '{,}')} \\cdot 10^{${parseInt(e, 10)}}`
@@ -383,7 +383,7 @@ export function toTex(n: Node): string {
     case 'var':
       return varTex(n.n)
     case 'group':
-      return `\\left(${toTex(n.a)}\\right)`
+      return n.sq ? `\\left[${toTex(n.a)}\\right]` : `\\left(${toTex(n.a)}\\right)`
     case 'neg': {
       const inner = n.a.t === 'add' || n.a.t === 'sub' ? `\\left(${toTex(n.a)}\\right)` : toTex(n.a)
       return `-${inner}`

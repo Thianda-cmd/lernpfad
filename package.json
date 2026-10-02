@@ -1,8 +1,8 @@
 {
-  "name": "lernlabor-bta",
+  "name": "lernpfad-bta",
   "private": true,
-  "version": "0.2.0",
-  "description": "LernLabor â€“ Lernplattform fÃ¼r die BTA-Ausbildung (Biologie, Chemie, Mathematik)",
+  "version": "0.3.0",
+  "description": "Lernpfad – Werkzeuge für die BTA-Ausbildung (Biologie, Chemie, Mathematik)",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test:chem": "rolldown ./tests/elements.check.ts --platform node --format esm --file node_modules/.cache/smoke/el.mjs --log-level silent && node node_modules/.cache/smoke/el.mjs",
     "test:nachweise": "rolldown ./tests/nachweise.check.ts --platform node --format esm --file node_modules/.cache/smoke/nw.mjs --log-level silent && node node_modules/.cache/smoke/nw.mjs",
-    "test:math":"rolldown ./tests/generators.smoke.ts --platform node --format esm --file node_modules/.cache/smoke/gen.mjs --log-level silent && node node_modules/.cache/smoke/gen.mjs && rolldown ./tests/content.smoke.ts --platform node --format esm --file node_modules/.cache/smoke/content.mjs --log-level silent && node node_modules/.cache/smoke/content.mjs"
+    "test:calc": "rolldown ./tests/calc.smoke.ts --platform node --format esm --file node_modules/.cache/smoke/calc.mjs --log-level silent && node node_modules/.cache/smoke/calc.mjs"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.3.0",
