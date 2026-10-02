@@ -250,7 +250,7 @@ function AccountMenu({ user, anchor, placement, onClose }: { user: BlobUser; anc
         <SyncState />
       </div>
       <nav className="konto-pop__list" aria-label="Konto">
-        <a href={`${BLOB_URL}/settings#connected`} target="_blank" rel="noreferrer" onClick={() => onClose(false)}>
+        <a href={`${BLOB_URL}/settings#settings-connected`} target="_blank" rel="noreferrer" onClick={() => onClose(false)}>
           <IconExternal size={16} /> Blob-Konto öffnen
         </a>
         <Link to="/einstellungen" onClick={() => onClose(false)}>
