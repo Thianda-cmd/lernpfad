@@ -97,6 +97,8 @@ angemeldet; deshalb zeigt Blob bei der nächsten Anmeldung auf diesem Gerät, mi
 - `public/blob-callback.html`: die Rückleitungsseite (muss in Blob als Redirect-URI eingetragen sein)
 
 Lokal gegen ein lokales Blob testen: `VITE_BLOB_ISSUER=http://localhost:3000 npm run dev`.
+Lokal die Seite unter `http://localhost:5173` öffnen (nicht `127.0.0.1`): nur diese Adresse ist in Blob als
+Redirect-URI eingetragen.
 Die Client-ID lässt sich mit `VITE_BLOB_CLIENT_ID` überschreiben.
 
 ## Projektstruktur
