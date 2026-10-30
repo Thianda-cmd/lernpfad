@@ -1,6 +1,6 @@
 /** Zahlen aus Eingabefeldern: „2,5“, „-3“, „1/3“, „2·10^-3“, „6,022e23“, „1 1/2“ */
 import { evaluate, parse, type Node } from '../expr'
-import { add, CalcError, div, isInt, mul, neg, qFromNumber, qFromRaw, qpow, sub, type Q } from '../q'
+import { add, CalcError, div, isInt, mul, neg, qFromNumber, qFromRaw, qpow, sub, toNum, type Q } from '../q'
 
 function exact(n: Node): Q | null {
   switch (n.t) {
@@ -57,4 +57,36 @@ export function parseNum(s: string, what = 'Wert'): NumIn | null {
   const v = evaluate(node)
   if (!Number.isFinite(v)) throw new CalcError(`${what}: „${s}“ ist keine Zahl.`)
   return { q: qFromNumber(v), dec: true }
+}
+
+/**
+ * Messreihe: „1,2; 1,5 1,4“ – Leerzeichen, Semikolon, Tab und Zeilenumbruch trennen,
+ * das Komma ist Dezimalzeichen. Jede Zahl darf auch „1/3“ oder „2·10^-3“ sein.
+ */
+export function parseList(s: string, what = 'Messwerte'): number[] {
+  const toks = s
+    .split(/[;\s]+/)
+    .map((t) => t.trim())
+    .filter(Boolean)
+  return toks.map((t, i) => {
+    const v = parseNum(t, `${what} (Wert ${i + 1})`)
+    return v ? toNumber(v) : NaN
+  })
+}
+
+/** Wertepaare, eines pro Zeile: „0,1; 0,25“ oder „0,1 0,25“ (x und y) */
+export function parsePairs(s: string, what = 'Wertepaare'): [number, number][] {
+  const out: [number, number][] = []
+  s.split(/\n+/).forEach((line, i) => {
+    const t = line.trim()
+    if (!t) return
+    const xs = parseList(t, `${what}, Zeile ${i + 1}`)
+    if (xs.length !== 2) throw new CalcError(`${what}, Zeile ${i + 1}: bitte genau zwei Zahlen (x und y), getrennt durch Semikolon oder Leerzeichen.`)
+    out.push([xs[0], xs[1]])
+  })
+  return out
+}
+
+function toNumber(v: NumIn): number {
+  return toNum(v.q)
 }

@@ -4,58 +4,13 @@
  * Atommassen wie in der Schule auf zwei Nachkommastellen gerundet.
  */
 import { FormulaError, parseFormula } from '../../chem/formula'
-import { add, approxTex, bgcd, CalcError, div, isTerminating, isZero, mul, neg, q, qFromRaw, qTex, sign, sub, toNum, type Q } from '../q'
+import { add, approxTex, CalcError, div, isZero, mul, neg, q, qFromRaw, qTex, sign, sub, toNum, type Q } from '../q'
+import { best, CONC_U, eqv, F, fac, MASS_U, MOL_U, nt, T, VOL_U } from './units'
 import type { NumIn } from './numinput'
 import type { Solution, Step } from './step'
 
 export const NA = qFromRaw('6.022e23')
-const F = { dec: true }
-
-export const MASS_U = [
-  { u: 'kg', f: q(1000) },
-  { u: 'g', f: q(1) },
-  { u: 'mg', f: q(1, 1000) },
-  { u: 'µg', f: q(1, 1000000) },
-] as const
-export const MOL_U = [
-  { u: 'mol', f: q(1) },
-  { u: 'mmol', f: q(1, 1000) },
-  { u: 'µmol', f: q(1, 1000000) },
-] as const
-export const VOL_U = [
-  { u: 'L', f: q(1) },
-  { u: 'mL', f: q(1, 1000) },
-  { u: 'µL', f: q(1, 1000000) },
-] as const
-export const CONC_U = [
-  { u: 'mol/L', f: q(1) },
-  { u: 'mmol/L', f: q(1, 1000) },
-] as const
-
-const fac = (list: readonly { u: string; f: Q }[], u: string) => list.find((x) => x.u === u)?.f ?? q(1)
-const T = (u: string) => `\\,\\text{${u}}`
-
-/** Zahl: exakt, wenn kurz – sonst 4 gültige Ziffern */
-function num(x: Q, sig = 4): { t: string; approx: boolean } {
-  if (isTerminating(x)) {
-    const t = qTex(x, F)
-    if (t.replace(/[^0-9]/g, '').length <= 7 && Math.abs(toNum(x)) >= 1e-4 && Math.abs(toNum(x)) < 1e7) return { t, approx: false }
-  }
-  return { t: approxTex(toNum(x), sig), approx: true }
-}
-const nt = (x: Q, sig = 4) => num(x, sig).t
-const eqv = (x: Q, sig = 4) => `${num(x, sig).approx ? '\\approx' : '='} ${num(x, sig).t}`
-
-/** Wert in passender Einheit (0,1 … 1000) */
-function best(x: Q, list: readonly { u: string; f: Q }[]) {
-  const v = Math.abs(toNum(x))
-  for (const e of list) {
-    const r = v / toNum(e.f)
-    if (r >= 0.1 && r < 1000) return { u: e.u, v: div(x, e.f) }
-  }
-  const last = list[list.length - 1]
-  return v >= 1000 * toNum(list[0].f) ? { u: list[0].u, v: div(x, list[0].f) } : { u: last.u, v: div(x, last.f) }
-}
+export { MASS_U, MOL_U, VOL_U, CONC_U } from './units'
 
 /* ---------------------------- molare Masse ---------------------------- */
 
@@ -340,4 +295,3 @@ export function mixResult(m1: NumIn | null, x1: NumIn | null, m2: NumIn | null, 
   return { result: `${name}_M ${eqv(r)}${xu}`, steps }
 }
 
-export { bgcd }

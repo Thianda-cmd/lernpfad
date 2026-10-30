@@ -1,11 +1,11 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useState, type ComponentType, type ReactNode } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useTheme } from '../lib/theme'
 import { useProgress } from '../store/progress'
 import { ALL_ORGANELLE_IDS } from '../data/organelles'
 import { Logo } from './Logo'
 import { ErrorBoundary } from './ErrorBoundary'
-import { CHEM_CALC, MATH_TOOLS } from '../math/tools'
+import { ALL_TOOLS, BIO_TOOLS, CHEM_TOOLS, MATH_TOOLS, type Subject } from '../math/tools'
 import {
   IconFlask,
   IconIons,
@@ -27,8 +27,7 @@ import {
 } from './icons'
 
 const CRUMB_LABELS: Record<string, string> = {
-  ...Object.fromEntries(MATH_TOOLS.map((t) => [t.id, t.title])),
-  rechnen: CHEM_CALC.title,
+  ...Object.fromEntries(ALL_TOOLS.map((t) => [t.id, t.title])),
   periodensystem: 'Periodensystem',
   molmasse: 'Molare Masse',
   ionen: 'Ionen & Salze',
@@ -46,6 +45,66 @@ const CRUMB_LABELS: Record<string, string> = {
 }
 
 const COLLAPSE_KEY = 'lernlabor-sidebar'
+const CLOSED_KEY = 'lernpfad-nav-zu'
+
+interface NavEntry {
+  to: string
+  icon: ComponentType<{ size?: number }>
+  label: string
+}
+interface NavSec {
+  id: Subject
+  label: string
+  to: string
+  groups: { sub?: string; items: NavEntry[] }[]
+}
+
+const tools = (list: typeof ALL_TOOLS): NavEntry[] => list.map((t) => ({ to: t.path, icon: t.icon, label: t.nav }))
+
+const SECTIONS: NavSec[] = [
+  { id: 'mathematik', label: 'Mathematik', to: '/mathematik', groups: [{ items: tools(MATH_TOOLS) }] },
+  {
+    id: 'chemie',
+    label: 'Chemie',
+    to: '/chemie',
+    groups: [
+      {
+        items: [
+          { to: '/chemie/periodensystem', icon: IconPeriodic, label: 'Periodensystem' },
+          { to: '/chemie/nachweise', icon: IconTube, label: 'Ionennachweise' },
+          { to: '/chemie/ionen', icon: IconIons, label: 'Ionen & Salze' },
+        ],
+      },
+      { sub: 'Rechner', items: [{ to: '/chemie/molmasse', icon: IconFlask, label: 'Molare Masse' }, ...tools(CHEM_TOOLS)] },
+    ],
+  },
+  {
+    id: 'biologie',
+    label: 'Biologie',
+    to: '/biologie',
+    groups: [
+      {
+        items: [
+          { to: '/biologie/zellbiologie/tierzelle', icon: IconAnimalCell, label: 'Tierzelle' },
+          { to: '/biologie/zellbiologie/pflanzenzelle', icon: IconPlantCell, label: 'Pflanzenzelle' },
+          { to: '/biologie/zellbiologie/vergleich', icon: IconCompare, label: 'Vergleich' },
+          { to: '/biologie/zellbiologie/lexikon', icon: IconBook, label: 'Lexikon' },
+          { to: '/biologie/zellteilung', icon: IconDivide, label: 'Mitose & Meiose' },
+        ],
+      },
+      { sub: 'Laborrechner', items: tools(BIO_TOOLS) },
+    ],
+  },
+]
+
+function readClosed(): string[] {
+  try {
+    const v = JSON.parse(localStorage.getItem(CLOSED_KEY) ?? '[]')
+    return Array.isArray(v) ? v.filter((x) => typeof x === 'string') : []
+  } catch {
+    return []
+  }
+}
 
 function useMediaQuery(query: string) {
   const [matches, setMatches] = useState(() => window.matchMedia(query).matches)
@@ -102,13 +161,18 @@ function NavItem({ to, icon, label, badge, end, match }: { to: string; icon: Rea
   )
 }
 
-/** Abschnittsüberschrift, die zur Fachübersicht führt */
-function NavSection({ to, label }: { to: string; label: string }) {
+/** Abschnittsüberschrift: Name führt zur Fachübersicht, Pfeil klappt ein und aus */
+function NavSection({ to, label, open, onToggle }: { to: string; label: string; open: boolean; onToggle: () => void }) {
   return (
-    <NavLink to={to} end className={({ isActive }) => `nav__section nav__section--link ${isActive ? 'is-active' : ''}`}>
-      {label}
-      <IconChevronRight size={13} />
-    </NavLink>
+    <div className="nav__section-row">
+      <NavLink to={to} end className={({ isActive }) => `nav__section nav__section--link ${isActive ? 'is-active' : ''}`}>
+        {label}
+        <IconChevronRight size={13} />
+      </NavLink>
+      <button type="button" className={`nav__toggle ${open ? 'is-open' : ''}`} onClick={onToggle} aria-expanded={open} aria-label={`${label} ${open ? 'einklappen' : 'ausklappen'}`}>
+        <IconChevronRight size={14} />
+      </button>
+    </div>
   )
 }
 
@@ -127,6 +191,17 @@ export default function Layout() {
   const fullscreen = pathname === '/chemie/periodensystem'
   const [fsExpanded, setFsExpanded] = useState(false)
   const collapsed = !mobile && (fullscreen ? !fsExpanded : collapsedPref)
+  const [closed, setClosed] = useState<string[]>(readClosed)
+  const toggleSection = (id: string) =>
+    setClosed((c) => {
+      const next = c.includes(id) ? c.filter((x) => x !== id) : [...c, id]
+      try {
+        localStorage.setItem(CLOSED_KEY, JSON.stringify(next))
+      } catch {
+        /* ignorieren */
+      }
+      return next
+    })
   const theme = useTheme()
   const learned = useProgress((s) => Object.keys(s.learned).length)
   const total = ALL_ORGANELLE_IDS.length
@@ -134,6 +209,12 @@ export default function Layout() {
   useEffect(() => {
     setOpen(false)
     window.scrollTo({ top: 0 })
+    // eingeklappten Abschnitt öffnen, wenn man hineinnavigiert
+    const sec = SECTIONS.find((x) => pathname === x.to || pathname.startsWith(x.to + '/'))
+    if (sec) setClosed((c) => (c.includes(sec.id) ? c.filter((x) => x !== sec.id) : c))
+    // aktiven Eintrag in der (langen) Seitenleiste sichtbar machen
+    const t = window.setTimeout(() => document.querySelector('.nav .nav__link.active')?.scrollIntoView({ block: 'nearest' }), 80)
+    return () => window.clearTimeout(t)
   }, [pathname])
 
   const toggleCollapsed = () => {
@@ -177,22 +258,24 @@ export default function Layout() {
         </div>
         <nav className="nav">
           <NavItem to="/" end icon={<IconOverview />} label="Übersicht" />
-          <NavSection to="/mathematik" label="Mathematik" />
-          {MATH_TOOLS.map((t) => (
-            <NavItem key={t.id} to={t.path} icon={<t.icon />} label={t.nav} />
-          ))}
-          <NavSection to="/chemie" label="Chemie" />
-          <NavItem to="/chemie/periodensystem" icon={<IconPeriodic />} label="Periodensystem" />
-          <NavItem to="/chemie/molmasse" icon={<IconFlask />} label="Molare Masse" />
-          <NavItem to={CHEM_CALC.path} icon={<CHEM_CALC.icon />} label={CHEM_CALC.nav} />
-          <NavItem to="/chemie/ionen" icon={<IconIons />} label="Ionen & Salze" />
-          <NavItem to="/chemie/nachweise" icon={<IconTube />} label="Ionennachweise" />
-          <NavSection to="/biologie" label="Biologie" />
-          <NavItem to="/biologie/zellbiologie/tierzelle" icon={<IconAnimalCell />} label="Tierzelle" />
-          <NavItem to="/biologie/zellbiologie/pflanzenzelle" icon={<IconPlantCell />} label="Pflanzenzelle" />
-          <NavItem to="/biologie/zellbiologie/vergleich" icon={<IconCompare />} label="Vergleich" />
-          <NavItem to="/biologie/zellbiologie/lexikon" icon={<IconBook />} label="Lexikon" />
-          <NavItem to="/biologie/zellteilung" icon={<IconDivide />} label="Mitose & Meiose" />
+          {SECTIONS.map((sec) => {
+            const open = !closed.includes(sec.id)
+            return (
+              <div key={sec.id} className="nav__group">
+                <NavSection to={sec.to} label={sec.label} open={open} onToggle={() => toggleSection(sec.id)} />
+                <div className={`nav__items ${open ? '' : 'is-closed'}`}>
+                  {sec.groups.map((g, gi) => (
+                    <div key={gi} className="nav__grp">
+                      {g.sub && <span className="nav__sub">{g.sub}</span>}
+                      {g.items.map((it) => (
+                        <NavItem key={it.to} to={it.to} icon={<it.icon />} label={it.label} />
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
         </nav>
         <div className="sidebar__footer">
           <div className="mini-progress">

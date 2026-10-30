@@ -334,12 +334,76 @@ ol {
   transform: none;
 }
 
+.nav__section-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.nav__section-row .nav__section {
+  flex: 1;
+  min-width: 0;
+}
+
+.nav__toggle {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 24px;
+  margin: 0 4px 3px 0;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-3);
+  transition: background 0.15s, color 0.15s;
+}
+
+.nav__toggle svg {
+  transition: transform 0.2s ease;
+}
+
+.nav__toggle.is-open svg {
+  transform: rotate(90deg);
+}
+
+.nav__toggle:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.nav__items {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.nav__items.is-closed {
+  display: none;
+}
+
+.nav__grp {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.nav__sub {
+  padding: 10px 12px 4px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+  opacity: 0.8;
+  white-space: nowrap;
+}
+
 .nav__link {
   position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
-  height: 38px;
+  height: 35px;
   padding: 0 12px;
   border-radius: 9px;
   color: var(--text-2);
@@ -427,6 +491,15 @@ ol {
 .app.is-collapsed .mini-progress,
 .app.is-collapsed .sidebar__btn-label {
   display: none;
+}
+
+.app.is-collapsed .nav__toggle,
+.app.is-collapsed .nav__sub {
+  display: none;
+}
+
+.app.is-collapsed .nav__items.is-closed {
+  display: flex;
 }
 
 .app.is-collapsed .nav__section {

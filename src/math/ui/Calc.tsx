@@ -135,6 +135,72 @@ export function NumField({
   )
 }
 
+/** Mehrzeiliges Feld für Messreihen oder Wertepaare */
+export function DataField({
+  label,
+  value,
+  onChange,
+  placeholder,
+  rows = 4,
+  sub,
+  hint,
+}: {
+  label: ReactNode
+  value: string
+  onChange: (v: string) => void
+  placeholder?: string
+  rows?: number
+  sub?: string
+  hint?: ReactNode
+}) {
+  return (
+    <label className="nf df">
+      <span className="nf__label">
+        {label}
+        {sub && <small>{sub}</small>}
+      </span>
+      <textarea className="df__input" value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} rows={rows} spellCheck={false} autoComplete="off" />
+      {hint && <span className="df__hint">{hint}</span>}
+    </label>
+  )
+}
+
+/** Einfache Tabelle für Ergebnisse (z. B. Verdünnungsreihe, Ansatz) */
+export function DataTable({ head, rows, caption, foot, className }: { head: ReactNode[]; rows: ReactNode[][]; caption?: ReactNode; foot?: ReactNode[]; className?: string }) {
+  return (
+    <div className={`calc__table-wrap ${className ?? ''}`}>
+      <table className="calc__table">
+        {caption && <caption>{caption}</caption>}
+        <thead>
+          <tr>
+            {head.map((h, i) => (
+              <th key={i}>{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r, i) => (
+            <tr key={i}>
+              {r.map((c, k) => (
+                <td key={k}>{c}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+        {foot && (
+          <tfoot>
+            <tr>
+              {foot.map((c, k) => (
+                <td key={k}>{c}</td>
+              ))}
+            </tr>
+          </tfoot>
+        )}
+      </table>
+    </div>
+  )
+}
+
 export function Rules({ title = 'Regeln', items }: { title?: string; items: [string, string][] }) {
   return (
     <aside className="calc__rules card" aria-label={title}>

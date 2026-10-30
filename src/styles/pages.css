@@ -187,6 +187,15 @@
   gap: 0 24px;
 }
 
+.dgroup__sub {
+  margin: 16px 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
 .dtiles {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));

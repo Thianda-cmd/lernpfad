@@ -3,7 +3,7 @@ import { parseNum } from '../../math/alg/numinput'
 import { amount, composition, CONC_U, dilution, formulaTexOf, MASS_U, mixCross, mixResult, MOL_U, solution, VOL_U, type Given } from '../../math/alg/stoich'
 import { CalcPage, Examples, NumField, Rules, Seg, SolutionCard, useParam, useSolve } from '../../math/ui/Calc'
 import { Tex } from '../../math/tex'
-import { CHEM_CALC } from '../../math/tools'
+import { CHEM_CALC, type CalcTool } from '../../math/tools'
 
 type Mode = 'stoffmenge' | 'zusammensetzung' | 'loesung' | 'verduennen' | 'mischen'
 
@@ -60,7 +60,7 @@ function FormulaField({ value, onChange, M, setM }: { value: string; onChange: (
   )
 }
 
-export default function Rechnen() {
+export default function Rechnen({ tool = CHEM_CALC }: { tool?: CalcTool }) {
   const [mode, setMode] = useParam('modus', 'stoffmenge')
   const m = (Object.keys(RULES).includes(mode) ? mode : 'stoffmenge') as Mode
   const [f, setF] = useParam('formel', 'H2SO4')
@@ -115,9 +115,9 @@ export default function Rechnen() {
   return (
     <CalcPage
       eyebrow="Chemie · Rechner"
-      title={CHEM_CALC.title}
+      title={tool.title}
       intro="Chemisches Rechnen fürs Labor: Stoffmenge und Teilchenzahl, Zusammensetzung von Verbindungen, Lösungen ansetzen, verdünnen und mischen – jeweils mit vollständigem Rechenweg."
-      path={CHEM_CALC.path}
+      path={tool.path}
       actions={
         <Seg
           value={m}

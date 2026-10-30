@@ -15,11 +15,10 @@ const Lexikon = lazy(() => import('./pages/Lexikon'))
 const Einstellungen = lazy(() => import('./pages/Einstellungen'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 const MathHome = lazy(() => import('./pages/math/MathHome'))
-const Calc = lazy(() => import('./pages/math/Calc'))
+const ToolRoute = lazy(() => import('./pages/ToolRoute'))
 const ChemHome = lazy(() => import('./pages/chem/ChemHome'))
 const Periodensystem = lazy(() => import('./pages/chem/Periodensystem'))
 const Molmasse = lazy(() => import('./pages/chem/Molmasse'))
-const ChemRechnen = lazy(() => import('./pages/chem/Rechnen'))
 const Ionen = lazy(() => import('./pages/chem/Ionen'))
 const Nachweise = lazy(() => import('./pages/chem/Nachweise'))
 const Zellteilung = lazy(() => import('./pages/bio/Zellteilung'))
@@ -44,11 +43,12 @@ export default function App() {
           <Route path="chemie" element={<S><ChemHome /></S>} />
           <Route path="chemie/periodensystem" element={<S><Periodensystem /></S>} />
           <Route path="chemie/molmasse" element={<S><Molmasse /></S>} />
-          <Route path="chemie/rechnen" element={<S><ChemRechnen /></S>} />
           <Route path="chemie/ionen" element={<S><Ionen /></S>} />
           <Route path="chemie/nachweise" element={<S><Nachweise /></S>} />
           <Route path="mathematik" element={<S><MathHome /></S>} />
-          <Route path="mathematik/:tool" element={<S><Calc /></S>} />
+          <Route path="mathematik/:tool" element={<S><ToolRoute subject="mathematik" /></S>} />
+          <Route path="chemie/:tool" element={<S><ToolRoute subject="chemie" /></S>} />
+          <Route path="biologie/:tool" element={<S><ToolRoute subject="biologie" /></S>} />
           <Route path="biologie/zellbiologie" element={<S><Zellbiologie /></S>} />
           <Route path="biologie/zellteilung" element={<S><Zellteilung /></S>} />
           <Route path="biologie/zellbiologie/tierzelle" element={<S><CellViewer key="tier" cell="tier" /></S>} />
