@@ -2372,7 +2372,7 @@ button.legend__i:hover,
 
 .nw-item {
   display: grid;
-  grid-template-columns: 54px minmax(0, 1fr) 12px;
+  grid-template-columns: 58px minmax(0, 1fr) 12px;
   align-items: center;
   gap: 8px;
   padding: 7px 10px;
@@ -2402,6 +2402,12 @@ button.legend__i:hover,
 .nw-item__ion {
   font-size: 15px;
   font-weight: 620;
+}
+
+/* lange Formeln wie CH₃COO⁻ */
+.nw-item__ion--long {
+  font-size: 12px;
+  white-space: nowrap;
 }
 
 .nw-item--kation .nw-item__ion {

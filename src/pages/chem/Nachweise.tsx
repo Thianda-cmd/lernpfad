@@ -224,7 +224,7 @@ function NachweisView() {
                   <span className="nw-list__k">{kind === 'anion' ? 'Anionen' : 'Kationen'}</span>
                   {items.map((x) => (
                     <button key={x.id} type="button" className={`nw-item ${x.id === n.id ? 'is-on' : ''} nw-item--${kind}`} onClick={() => pick(x.id)}>
-                      <span className="nw-item__ion">
+                      <span className={`nw-item__ion ${x.ion.split('^')[0].length > 5 ? 'nw-item__ion--long' : ''}`}>
                         <Sp s={x.ion} />
                       </span>
                       <span className="nw-item__txt">
