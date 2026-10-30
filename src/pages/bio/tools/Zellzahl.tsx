@@ -175,6 +175,9 @@ export default function Zellzahl({ tool }: { tool: CalcTool }) {
   }
   const pickVessel = (k: string) => {
     const e = VESSELS[k]
+    // Gefäßvorlagen bringen ihre Wachstumsfläche mit – die zählt nur bei „Zellen pro cm²“
+    // (sonst bekäme eine T75-Flasche dieselben 5 · 10⁴ Zellen wie ein Well)
+    setTarget('flaeche')
     setArea(e.area)
     setMed(e.med)
     setMedu('mL')

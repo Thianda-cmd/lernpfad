@@ -464,4 +464,36 @@ group('bio', () => {
   check('sci: exakte Hälfte rundet auf', sci(1055000, 3).t === '1{,}06 \\cdot 10^{6}' && sci(1055000, 3).approx)
   check('sci: kleine Zahl', sci(2.5e-7, 4, 1e-2).t === '2{,}5 \\cdot 10^{-7}')
   check('sci: mittlere Zahl normal', sci(8000, 3).t === '8000')
+
+  /* ============================ Prüfung (Verifier) ============================ */
+  {
+    // Zahlen im Erklärtext müssen in $…$ stehen – sonst erscheinen {,}, \frac oder \, sichtbar im Fließtext
+    const texOutside = (t?: string) => /\\|\{,\}|\^\{|_\{/.test((t ?? '').replace(/\$[^$]*\$/g, ''))
+    const clean = (s: Solution | null) => !!s && ![s.remark, ...s.steps.map((x) => x.note)].some(texOutside)
+    const a = R('Aussäen 2,5 mL je Gefäß, 12,5 % Zuschlag', () =>
+      seeding({ c: N('1,2e6'), target: 'abs', perVessel: N('2e5'), n: N('6'), vMed: N('2,5'), vu: 'mL', reserve: N('12,5') }),
+    )
+    check('Aussäen: kein TeX außerhalb von $…$', clean(a))
+    near('Aussäen: Zellsuspension (mL)', a?.vCells ?? NaN, (2e5 / 2.5) * 6 * 2.5 * 1.125 / 1.2e6)
+    check('Aussäen 1/3 mL: kein TeX außerhalb von $…$', clean(R('Aussäen 1/3 mL', () => seeding({ c: N('1e6'), target: 'abs', perVessel: N('1e4'), n: N('96'), vMed: N('1/3'), vu: 'mL' }))))
+    const v = R('Vergrößerung 12,5er-Okular', () => magnification({ obj: N('40'), ok: N('12,5') }))
+    check('Vergrößerung: kein TeX außerhalb von $…$', clean(v))
+    near('Vergrößerung 40 × 12,5', v?.V ?? NaN, 500)
+    const e = R('Eichen mit 2,5er-Objektiv', () => calibrate({ len: N('1'), div: N('100'), x: N('20'), y: N('50'), obj: N('2,5') }))
+    check('Eichen: kein TeX außerhalb von $…$', clean(e))
+    near('Eichen: Eichfaktor', e?.E ?? NaN, 4)
+    expectError('Eichen: Objektiv 1000-fach', () => calibrate({ len: N('1'), div: N('100'), x: N('20'), y: N('50'), obj: N('1000') }))
+    expectError('Eichen: 1 Million Teilstriche', () => calibrate({ len: N('1'), div: N('1000000'), x: N('20'), y: N('50') }))
+    // Quadrieren: Zehnerpotenzen und Brüche in Klammern, sonst „10^{-5}^2“ (KaTeX-Fehler, run() prüft das)
+    const z = R('Zentrifuge: Drehzahl 1e-5 min⁻¹', () => rcfFromRpm({ r: N('10'), ru: 'cm', n: N('1e-5') }))
+    check('Zentrifuge: (1 · 10⁻⁵)² in Klammern', !!z?.steps.some((x) => x.tex.includes('\\left(1 \\cdot 10^{-5}\\right)^2')))
+    R('Zentrifuge: Rotor mit 1e-5 min⁻¹', () => rotorSwap({ r1: N('15'), n1: N('1e-5'), r2: N('8'), ru: 'cm' }))
+    // Überschriften werden in Großbuchstaben gesetzt: „pro mL“ würde zu „PRO ML“ (Megaliter)
+    const vit = R('Vitalität: Überschriften', () => viability({ chamber: 'gross', live: '180', dead: '20', squares: N('4') }))
+    check('Vitalität: keine Einheit in Überschriften', !!vit && !vit.steps.some((x) => /\bmL\b|µ/.test(x.head ?? '')))
+    // unrealistische Zeiten (z. B. 1e400 → unendlich) geben eine Meldung statt „g = –“ und eines kaputten Diagramms
+    expectError('Wachstum: Zeit 1e400', () => growth({ mode: 'messung', N0: N('1e4'), Nt: N('1e7'), t: N('1e400'), tu: 'min' }))
+    expectError('Wachstum: Generationszeit 1e7 min', () => growth({ mode: 'dauer', N0: N('1e4'), g: N('1e7'), N: N('1e6'), tu: 'min' }))
+    expectError('Wachstum: Zeit 2e6 h', () => growth({ mode: 'menge', N0: N('1e4'), g: N('20'), t: N('2e6'), tu: 'h' }))
+  }
 })

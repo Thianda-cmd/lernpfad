@@ -434,4 +434,19 @@ group('chem-a', () => {
   expectError('Zustand: alles gegeben', () => gasChange({ p1: N('1'), p2: N('2'), pu: 'bar', V1: N('1'), V2: N('1'), vu: 'L', T1: N('300'), T2: N('600'), tu: 'K' }))
   expectError('Zustand: unter 0 K', () => gasChange({ p1: N('1'), p2: null, pu: 'bar', V1: N('1'), V2: N('1'), vu: 'L', T1: N('-300'), T2: N('20'), tu: '°C' }))
   expectError('Zustand: zwei Größen konstant', () => gasChange({ p1: null, p2: null, pu: 'bar', V1: null, V2: null, vu: 'L', T1: N('300'), T2: null, tu: 'K' }))
+
+  /* Prüfung (Verifier): Zusatzzeilen stehen ohne Scrollleiste im Ergebnis – auf dem Handy (390 px) passen
+     nur etwa 45 Zeichen, längere Zeilen wurden abgeschnitten („… 440,3 g gelösten“) */
+  {
+    const plainLen = (t: string) => t.replace(/\\text\{([^}]*)\}/g, '$1').replace(/\\[a-z]+|[{}\\]/g, '').replace(/\s+/g, ' ').trim().length
+    for (const [w, rho] of [['37', '1,19'], ['96', '1,84']]) {
+      const s = R(`Zusatzzeile w = ${w} %`, () => convertConc({ known: 'w', value: N(w), unit: '%', formula: 'H2SO4', rho: N(rho), rhoUnit: 'g/mL' }))
+      const line = s?.extra?.find((x) => x.includes('Lösung')) ?? ''
+      check(`Zusatzzeile w = ${w} %: kurz genug fürs Handy`, line !== '' && plainLen(line) <= 45, `${plainLen(line)} Zeichen: ${line}`)
+    }
+    // Dihydrogenphosphat ist ein Ampholyt: als reine Säure gerechnet pH 4,11, eine NaH₂PO₄-Lösung hat aber etwa 4,7
+    const d = R('Dihydrogenphosphat 0,1 mol/L', () => weakPh({ kind: 'saeure', kType: 'pKs', k: N('7,21'), c: N('0,1'), cu: 'mol/L', preset: 'dhp' }))
+    near('Dihydrogenphosphat: pH als Säure', d?.pH ?? NaN, 4.105, 2e-3)
+    has('Dihydrogenphosphat: Ampholyt erklärt', d, 'Ampholyt')
+  }
 })

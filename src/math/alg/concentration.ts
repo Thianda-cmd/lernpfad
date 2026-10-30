@@ -238,7 +238,7 @@ export function convertConc(o: { known: ConcKind; value: NumIn | null; unit: str
     })
     extra.push(`w ${eqx(ppm)}\\,\\text{ppm}\\ (\\text{mg/kg})`)
   }
-  if (rL && beta) extra.push(`1\\,\\text{L Lösung wiegt } ${ntr(rL)}\\,\\text{g und enthält } ${ntr(beta)}\\,\\text{g gelösten Stoff}`)
+  if (rL && beta) extra.push(`1\\,\\text{L Lösung wiegt } ${ntr(rL)}\\,\\text{g, davon } ${ntr(beta)}\\,\\text{g Stoff}`)
 
   const res: string[] = []
   if (o.known !== 'c' && c) res.push(`c ${bestEq(c, CONC_U)}`)

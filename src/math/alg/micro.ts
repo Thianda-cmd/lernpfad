@@ -273,6 +273,10 @@ export function growth(o: { mode: GrowthMode | string; N0: NumIn | null; Nt?: Nu
   const tooBig = (x: number) => {
     if (x > 1e15) throw new CalcError('Mehr als 10¹⁵ Zellen sind unrealistisch – bitte die Eingabe prüfen.')
   }
+  /** Zeiten (t, g) in der gewählten Einheit: über 10⁶ ist sicher ein Tippfehler */
+  const timeOk = (x: number, what: string) => {
+    if (!Number.isFinite(x) || x > 1e6) throw new CalcError(`${what} ist unrealistisch groß – bitte Wert und Einheit prüfen.`)
+  }
   tooBig(N0)
   const steps: Step[] = []
   const rem = 'Die Formeln gelten nur in der exponentiellen (logarithmischen) Wachstumsphase – nicht in der Anlaufphase (lag-Phase) und nicht mehr in der stationären Phase. Zur Orientierung: E. coli teilt sich unter optimalen Bedingungen etwa alle 20 min, viele Säugerzellen in Kultur etwa alle 24 h.'
@@ -280,9 +284,11 @@ export function growth(o: { mode: GrowthMode | string; N0: NumIn | null; Nt?: Nu
   if (o.mode === 'menge' || o.mode === 'dauer') {
     const gq = needPos(o.g, 'die Generationszeit g', 'Die Generationszeit g')
     const g = toNum(gq)
+    timeOk(g, 'Die Generationszeit')
     if (o.mode === 'menge') {
       const tq = needPos(o.t, 'die Zeit t', 'Die Zeit t')
       const t = toNum(tq)
+      timeOk(t, 'Die Zeit')
       const nq = div(tq, gq)
       const n = toNum(nq)
       if (n > 200) throw new CalcError('Mehr als 200 Generationen: So lange wächst keine Kultur exponentiell – Nährstoffe und Platz gehen viel früher aus.')
@@ -349,6 +355,7 @@ export function growth(o: { mode: GrowthMode | string; N0: NumIn | null; Nt?: Nu
   const Nt = toNum(Ntq)
   const t = toNum(tq)
   tooBig(Nt)
+  timeOk(t, 'Die Zeit')
   if (Nt < N0) throw new CalcError('Die Zellzahl hat abgenommen – das ist keine Wachstumsphase (eher Absterbephase). Die Generationszeit nur aus der exponentiellen Phase bestimmen.')
   if (Nt === N0) throw new CalcError('Die Zellzahl hat sich nicht verändert – keine Vermehrung (Anlauf- oder stationäre Phase).')
   const lt = Math.log10(Nt)

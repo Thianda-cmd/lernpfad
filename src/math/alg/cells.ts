@@ -353,7 +353,7 @@ export function viability(o: ChamberIn & { live: string; dead: string; squares?:
   const vq = `${sciT(toNum(g.vQ), 4, 1e-2)}${T('mL')}`
   steps.push({
     tex: `\\bar N_{\\text{lebend}} = \\frac{${L}}{${n}} ${qeq(mL)} \\;\\Rightarrow\\; c_{\\text{lebend}} = \\frac{${qt(mL)}}{${vq}} \\cdot ${qt(g.dil)} ${cEq(toNum(live))}${CELLS}`,
-    head: 'Lebende Zellen pro mL',
+    head: 'Lebende Zellen pro Milliliter',
     note: 'Für die Aussaat zählen nur die ungefärbten Zellen: Mittelwert pro Quadrat durch das Quadratvolumen, mal Verdünnungsfaktor.',
     final: true,
   })
@@ -477,7 +477,7 @@ export function seeding(o: {
     head: 'Gesamtvolumen',
     note: isZero(z)
       ? 'Ohne Zuschlag – beim Verteilen bleibt aber immer ein kleiner Rest im Gefäß zurück.'
-      : `Mit ${qTex(z, F).replace('{,}', ',')} % Zuschlag für Pipettierverluste (Rest im Reservoir, Benetzung der Spitzen).`,
+      : `Mit $${qTex(z, F)}\\,\\%$ Zuschlag für Pipettierverluste (Rest im Reservoir, Benetzung der Spitzen).`,
   })
   const V1 = div(mul(c2, V2), c1)
   const Vm = sub(V2, V1)
@@ -502,7 +502,7 @@ export function seeding(o: {
   steps.push({
     tex: `\\text{je Gefäß: } ${vgT}\\ \\text{Ansatz} \\;\\widehat{=}\\; ${cTex(toNum(N))}\\ \\text{Zellen}`,
     head: 'Verteilen',
-    note: `Rechnerisch enthält jedes Gefäß $${volTex(L(per1))}$ Zellsuspension und $${volTex(L(sub(vG, per1)))}$ Medium. Gleichmäßiger und schneller ist es, erst den gemeinsamen Ansatz zu mischen und dann je ${qTex(vIn, F).replace('{,}', ',')} ${o.vu} zu verteilen.`,
+    note: `Rechnerisch enthält jedes Gefäß $${volTex(L(per1))}$ Zellsuspension und $${volTex(L(sub(vG, per1)))}$ Medium. Gleichmäßiger und schneller ist es, erst den gemeinsamen Ansatz zu mischen und dann je $${vgT}$ zu verteilen.`,
   })
   const Ntot = mul(c1, V1)
   steps.push({

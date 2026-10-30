@@ -61,7 +61,7 @@ export function magnification(o: { obj: NumIn | null; ok: NumIn | null; tube?: N
   steps.push({
     tex: `V = ${qTex(vo, F)} \\cdot ${qTex(vk, F)}${tube ? ` \\cdot ${qTex(tube, F)}` : ''} ${qeq(V, 6)}`,
     head: 'Einsetzen',
-    note: `Das Bild erscheint ${qt(V, 6).replace(/\\,/g, ' ').replace('{,}', ',')}-mal so groß wie das Objekt ($${qt(V, 6)} : 1$).`,
+    note: `Das Bild erscheint $${qt(V, 6)}$-mal so groß wie das Objekt ($${qt(V, 6)} : 1$).`,
     final: true,
   })
   const extra: string[] = [`${qt(V, 6)} : 1`]
@@ -114,7 +114,8 @@ export function calibrate(o: { len: NumIn | null; div: NumIn | null; x: NumIn | 
   const x = needPos(o.x, 'die Teilstriche des Objektmikrometers', 'Die Zahl der Objektmikrometer-Teilstriche')
   const y = needPos(o.y, 'die Teilstriche des Okularmikrometers', 'Die Zahl der Okularmikrometer-Teilstriche')
   if (toNum(L) > 10) throw new CalcError('Objektmikrometer sind meist 1 mm oder 2 mm lang – bitte die Länge in mm eingeben.')
-  if (toNum(x) > toNum(nd)) throw new CalcError(`Das Objektmikrometer hat nur ${qt(nd)} Teilstriche – es können nicht mehr übereinanderliegen.`)
+  if (toNum(nd) > 2000) throw new CalcError('So fein ist kein Objektmikrometer geteilt – üblich sind 100 Teilstriche auf 1 mm (10 µm je Teilstrich).')
+  if (toNum(x) > toNum(nd)) throw new CalcError(`Das Objektmikrometer hat nur $${qt(nd)}$ Teilstriche – es können nicht mehr übereinanderliegen.`)
   const tObj = div(mul(L, q(1000)), nd) // µm pro Teilstrich
   const steps: Step[] = []
   steps.push({
@@ -137,7 +138,8 @@ export function calibrate(o: { len: NumIn | null; div: NumIn | null; x: NumIn | 
   let remark = 'Die Eichung gilt nur für das verwendete Objektiv (und die Zwischenvergrößerung). Für jedes Objektiv einmal eichen und den Eichfaktor notieren.'
   if (o.obj) {
     const vo = needPos(o.obj, 'die Objektivvergrößerung', 'Die Objektivvergrößerung')
-    remark = `Der Eichfaktor gilt nur für das ${qt(vo, 6).replace('{,}', ',')}er-Objektiv. Für andere Objektive neu eichen – umrechnen ($E \\sim \\tfrac{1}{V_{\\text{Obj}}}$) ist nur eine grobe Schätzung, weil die aufgedruckten Vergrößerungen nicht ganz genau stimmen.`
+    if (toNum(vo) > 250) throw new CalcError('Objektive vergrößern höchstens etwa 100- bis 150-fach.')
+    remark = `Der Eichfaktor gilt nur für das Objektiv $${qt(vo, 6)}\\times$. Für andere Objektive neu eichen – umrechnen ($E \\sim \\tfrac{1}{V_{\\text{Obj}}}$) ist nur eine grobe Schätzung, weil die aufgedruckten Vergrößerungen nicht ganz genau stimmen.`
   }
   return { result: `E ${qeq(E, 4)}${T('µm')}\\ \\text{pro Teilstrich}`, extra: [`t_{\\text{Obj}} ${qeq(tObj, 6)}${T('µm')}`], steps, remark, E: toNum(E) }
 }

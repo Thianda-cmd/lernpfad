@@ -441,6 +441,10 @@ export function weakPh(o: { kind: AcidBase; kType: KType; k: NumIn | null; c: Nu
     extra.unshift(`\\text{ohne Wasser-Autoprotolyse: pH} ${p2eq(acid ? -lg(x) : 14 + lg(x))}`)
   }
   if (pre?.id === 'kohlen') remarks.push('Kohlensäure: Der pKs-Wert 6,35 bezieht sich auf das gesamte gelöste $\\mathrm{CO_2}$ (fast alles liegt als $\\mathrm{CO_2}$, nicht als $\\mathrm{H_2CO_3}$ vor).')
+  if (pre?.id === 'dhp')
+    remarks.push(
+      'Achtung, Ampholyt: $\\mathrm{H_2PO_4^-}$ kann ein Proton abgeben, aber auch eines aufnehmen. Eine Lösung von $\\mathrm{NaH_2PO_4}$ ist deshalb weniger sauer, als hier als reine Säure gerechnet – näherungsweise gilt $\\text{pH} \\approx \\tfrac{1}{2}(\\text{p}K_{S1} + \\text{p}K_{S2}) = \\tfrac{1}{2}(2{,}15 + 7{,}21) \\approx 4{,}7$. Als Puffersäure (Phosphatpuffer) zählt nur $\\text{p}K_S = 7{,}21$.',
+    )
   if (pK < 2) remarks.push(`Mit $${pKsym} < 2$ ist ${acid ? 'die Säure' : 'die Base'} schon fast stark – die Näherungsformel taugt hier nicht.`)
   steps.push(classStep(pH))
   return { result: `\\text{pH} ${p2eq(pH)}`, extra, steps, remark: remarks.join(' '), pH }

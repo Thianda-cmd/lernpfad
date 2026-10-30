@@ -254,6 +254,8 @@ export function mixCross(w1: NumIn | null, w2: NumIn | null, wz: NumIn | null, t
   const a = w1.q
   const b = w2.q
   const z = wz.q
+  if ([a, b, z].some((x) => sign(x) < 0 || toNum(x) > 100)) throw new CalcError('Massenanteile liegen zwischen 0 % (reines Wasser) und 100 % (reiner Stoff).')
+  if (total && sign(total.q) <= 0) throw new CalcError('Die Gesamtmasse muss größer als 0 sein.')
   const lo = toNum(a) < toNum(b) ? a : b
   const hi = lo === a ? b : a
   if (!(toNum(z) > toNum(lo) && toNum(z) < toNum(hi))) throw new CalcError('Die Zielkonzentration muss zwischen den beiden Ausgangskonzentrationen liegen.')
@@ -266,7 +268,7 @@ export function mixCross(w1: NumIn | null, w2: NumIn | null, wz: NumIn | null, t
   steps.push({
     tex: `\\begin{array}{ccccc} ${P(a)} & & & & ${qTex(t1, F)}\\ \\text{Teile} \\\\ & \\searrow & & \\nearrow & \\\\ & & ${P(z)} & & \\\\ & \\nearrow & & \\searrow & \\\\ ${P(b)} & & & & ${qTex(t2, F)}\\ \\text{Teile} \\end{array}`,
     head: 'Mischungskreuz',
-    note: `Links die Ausgangslösungen, in der Mitte das Ziel. Über Kreuz die Differenzen bilden (immer größere minus kleinere Zahl): $|${qTex(z, F)} - ${qTex(b, F)}| = ${qTex(t1, F)}$ Teile der ${qTex(a, F).replace('{,}', ',')}-%-Lösung, $|${qTex(a, F)} - ${qTex(z, F)}| = ${qTex(t2, F)}$ Teile der ${qTex(b, F).replace('{,}', ',')}-%-Lösung.`,
+    note: `Links die Ausgangslösungen, in der Mitte das Ziel. Über Kreuz die Differenzen bilden (immer größere minus kleinere Zahl): $|${qTex(z, F)} - ${qTex(b, F)}| = ${qTex(t1, F)}$ Teile der Lösung mit $${P(a)}$, $|${qTex(a, F)} - ${qTex(z, F)}| = ${qTex(t2, F)}$ Teile der Lösung mit $${P(b)}$.`,
   })
   const g = (() => {
     // Verhältnis kürzen (auch bei Kommazahlen)
@@ -293,6 +295,9 @@ export function mixCross(w1: NumIn | null, w2: NumIn | null, wz: NumIn | null, t
 /** Mischung berechnen: w_M = (m₁w₁ + m₂w₂)/(m₁ + m₂) – auch für Mischtemperaturen */
 export function mixResult(m1: NumIn | null, x1: NumIn | null, m2: NumIn | null, x2: NumIn | null, kind: 'w' | 'T', unit = 'g'): Solution {
   if (!m1 || !x1 || !m2 || !x2) throw new CalcError('Bitte alle vier Werte eingeben.')
+  if (sign(m1.q) <= 0 || sign(m2.q) <= 0) throw new CalcError('Die Massen müssen größer als 0 sein.')
+  if (kind === 'w' && [x1.q, x2.q].some((x) => sign(x) < 0 || toNum(x) > 100)) throw new CalcError('Massenanteile liegen zwischen 0 % (reines Wasser) und 100 % (reiner Stoff).')
+  if (kind === 'T' && [x1.q, x2.q].some((x) => toNum(x) < -273.15)) throw new CalcError('Kälter als −273,15 °C (absoluter Nullpunkt) geht nicht.')
   const u = T(unit)
   const xu = kind === 'w' ? '\\,\\%' : '\\,^{\\circ}\\text{C}'
   const name = kind === 'w' ? 'w' : 'T'

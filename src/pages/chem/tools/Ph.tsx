@@ -158,7 +158,7 @@ export default function Ph({ tool }: { tool: CalcTool }) {
   const [ca, setCa] = useParam('ca', '0,1')
   const [cb, setCb] = useParam('cb', '0,1')
   const [csu, setCsu] = useParam('csu', 'mol/L')
-  const [vp, setVp] = useParam('vp', '')
+  const [vp, setVp] = useParam('vp', '100')
   const [vpu, setVpu] = useParam('vpu', 'mL')
   const [zug, setZug] = useParam('zugabe', 'keine')
   const [czu, setCzu] = useParam('czu', '0,1')

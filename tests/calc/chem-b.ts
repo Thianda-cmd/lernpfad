@@ -5,7 +5,7 @@ import { parseNum } from '../../src/math/alg/numinput'
 import { balanced, balanceEquation, looksLikeReaction, parseReaction, reactionAmounts, reactionYield } from '../../src/math/alg/reaction'
 import { calibration, lambertBeer, transExt } from '../../src/math/alg/photometry'
 import { convertAll, convertUnits, QTYS } from '../../src/math/alg/convert'
-import { amount, atomsOf, composition, matchElements, molarFromMass, molarMass } from '../../src/math/alg/stoich'
+import { amount, atomsOf, composition, matchElements, mixCross, mixResult, molarFromMass, molarMass } from '../../src/math/alg/stoich'
 import { CONC_U, MASS_U, MCONC_U, MOL_U, T, VOL_U } from '../../src/math/alg/units'
 import { toNum } from '../../src/math/q'
 import { detect } from '../../src/math/quick'
@@ -529,4 +529,25 @@ group('chem-b', () => {
   expectError('Einheiten: unbekannte Einheit', () => convertUnits('masse', N('1'), 'xyz', 'g'))
   expectError('Einheiten: Einheit einer anderen Größe', () => convertUnits('masse', N('1'), 'mL', 'g'))
   expectError('Einheiten: leerer Wert', () => convertUnits('volumen', null, 'mL', 'L'))
+
+  /* Prüfung (Verifier): Mischungskreuz und Mischungsgleichung */
+  {
+    // Zahlen im Erklärtext stehen in $…$ – sonst erscheinen {,}, \frac oder \, sichtbar im Fließtext
+    const texOutside = (t?: string) => /\\|\{,\}|\^\{|_\{/.test((t ?? '').replace(/\$[^$]*\$/g, ''))
+    const clean = (s: Solution | null) => !!s && ![s.remark, ...s.steps.map((x) => x.note)].some(texOutside)
+    const k = runC('Mischungskreuz 96 % und 2/3 %', () => mixCross(N('96'), N('2/3'), N('70'), N('500'), 'g'))
+    check('Mischungskreuz: kein TeX außerhalb von $…$', clean(k))
+    near('Mischungskreuz: m₁ (70 % aus 96 % und 2/3 %)', valOf(k, 'm_1'), (500 * (70 - 2 / 3)) / (96 - 2 / 3), 1e-3)
+    check('Mischungskreuz 12,5 %: kein TeX im Text', clean(runC('Mischungskreuz 12,5 %', () => mixCross(N('12,5'), N('0'), N('5'), null))))
+    expectError('Mischungskreuz: über 100 %', () => mixCross(N('150'), N('10'), N('50'), null))
+    expectError('Mischungskreuz: negativer Anteil', () => mixCross(N('40'), N('-10'), N('20'), null))
+    expectError('Mischungskreuz: Gesamtmasse 0', () => mixCross(N('40'), N('10'), N('25'), N('0')))
+    near('Mischungsgleichung: 100 g 20 % + 300 g 4 %', valOf(runC('Mischungsgleichung', () => mixResult(N('100'), N('20'), N('300'), N('4'), 'w')), 'w_M'), 8)
+    expectError('Mischungsgleichung: negative Masse', () => mixResult(N('-100'), N('20'), N('300'), N('4'), 'w'))
+    expectError('Mischungsgleichung: w über 100 %', () => mixResult(N('100'), N('120'), N('300'), N('4'), 'w'))
+    expectError('Mischtemperatur: unter dem absoluten Nullpunkt', () => mixResult(N('1'), N('-300'), N('1'), N('20'), 'T', 'kg'))
+    // durch den Nullpunkt mit lauter gleichen Extinktionen: R² wäre 0/0 (früher „R² = –“ im Ergebnis)
+    expectError('Kalibrierung durch 0: alle E gleich', () => calibration({ pairs: '1; 0,1\n2; 0,1\n3; 0,1', samples: '', origin: true, F: null, unit: 'mg/L' }))
+    expectError('Kalibrierung: alle E gleich', () => calibration({ pairs: '1; 0,1\n2; 0,1\n3; 0,1', samples: '', origin: false, F: null, unit: 'mg/L' }))
+  }
 })

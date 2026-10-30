@@ -16,6 +16,8 @@ export const K_RZB = qFromRaw('1.118e-5')
 const K_TEX = '1{,}118 \\cdot 10^{-5}'
 const RPM = T('min⁻¹')
 const XG = '\\times g'
+/** Zahl zum Quadrieren: Zehnerpotenzen und Brüche in Klammern ((1 · 10⁻³)², nicht 10^{-3}^2) */
+const sq = (t: string) => (t.includes('\\') ? `\\left(${t}\\right)^2` : `${t}^2`)
 
 export interface CentSolution extends Solution {
   /** RZB (× g) */
@@ -65,7 +67,7 @@ export function rcfFromRpm(o: { r: NumIn | null; ru: string; n: NumIn | null }):
   const n2 = mul(n, n)
   const rcf = mul(mul(K_RZB, r.cm), n2)
   steps.push({
-    tex: `\\text{RZB} = ${K_TEX} \\cdot ${qt(r.cm, 6)} \\cdot ${qt(n, 8)}^2 = ${K_TEX} \\cdot ${qt(r.cm, 6)} \\cdot ${sciT(toNum(n2), 4, 1e-3, 1e8)} ${feqv(toNum(rcf), 4)} ${XG}`,
+    tex: `\\text{RZB} = ${K_TEX} \\cdot ${qt(r.cm, 6)} \\cdot ${sq(qt(n, 8))} = ${K_TEX} \\cdot ${qt(r.cm, 6)} \\cdot ${sciT(toNum(n2), 4, 1e-3, 1e8)} ${feqv(toNum(rcf), 4)} ${XG}`,
     head: 'Einsetzen',
     note: 'Die Drehzahl geht im Quadrat ein: doppelte Drehzahl → vierfache Beschleunigung.',
     final: true,
@@ -107,7 +109,7 @@ export function rpmFromRcf(o: { r: NumIn | null; ru: string; rcf: NumIn | null }
   const rnd = Math.round(n / 10) * 10
   const back = toNum(K_RZB) * toNum(r.cm) * rnd * rnd
   steps.push({
-    tex: `\\text{RZB} = ${K_TEX} \\cdot ${qt(r.cm, 6)} \\cdot ${fnt(rnd, 8)}^2 ${feqv(back, 4)} ${XG}`,
+    tex: `\\text{RZB} = ${K_TEX} \\cdot ${qt(r.cm, 6)} \\cdot ${sq(fnt(rnd, 8))} ${feqv(back, 4)} ${XG}`,
     head: 'Probe',
     note: `Mit der auf 10 gerundeten Drehzahl $${fnt(rnd, 8)}\\,\\text{min}^{-1}$ (so lässt sie sich einstellen) kommt man wieder ungefähr auf die geforderte RZB.`,
   })
@@ -138,7 +140,7 @@ export function rotorSwap(o: { r1: NumIn | null; n1: NumIn | null; r2: NumIn | n
   steps.push({ tex: `\\text{RZB} = ${K_TEX} \\cdot r \\cdot n^2`, head: 'Formel', note: DERIVATION })
   const rcf = mul(mul(K_RZB, r1.cm), mul(n1, n1))
   steps.push({
-    tex: `\\text{RZB} = ${K_TEX} \\cdot ${qt(r1.cm, 6)} \\cdot ${qt(n1, 8)}^2 ${feqv(toNum(rcf), 4)} ${XG}`,
+    tex: `\\text{RZB} = ${K_TEX} \\cdot ${qt(r1.cm, 6)} \\cdot ${sq(qt(n1, 8))} ${feqv(toNum(rcf), 4)} ${XG}`,
     head: 'RZB aus dem Protokoll',
     note: 'Erst die Beschleunigung ausrechnen, die das Protokoll eigentlich meint.',
   })

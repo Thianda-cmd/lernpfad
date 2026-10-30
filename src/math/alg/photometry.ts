@@ -212,6 +212,7 @@ export function calibration(o: { pairs: string; samples: string; origin: boolean
   const xs = pts.map((p) => p[0])
   const ys = pts.map((p) => p[1])
   if (Math.max(...xs) - Math.min(...xs) <= 0) throw new CalcError('Die Standards brauchen verschiedene Konzentrationen.')
+  if (Math.max(...ys) - Math.min(...ys) <= 0) throw new CalcError('Alle Standards haben dieselbe Extinktion – sie ändert sich nicht mit der Konzentration. Prüfe die Messwerte (Wellenlänge, Leerwert).')
   if (o.F && sign(sub(o.F.q, q(1))) < 0) throw new CalcError('Der Verdünnungsfaktor ist mindestens 1 (z. B. 10 bei einer Verdünnung 1 : 10).')
   const n = pts.length
   const steps: Step[] = []

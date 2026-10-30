@@ -1,5 +1,6 @@
 import { parseNum } from '../../../math/alg/numinput'
-import { formulaTexOf } from '../../../math/alg/stoich'
+import { formulaTexOf, molarMass } from '../../../math/alg/stoich'
+import { toNum } from '../../../math/q'
 import { PRIMARY, titer, titrationConc, titrationPredict, TITRATIONS, type ProbeGiven, type TitrationSolution } from '../../../math/alg/titration'
 import { CONC_U, MASS_U, unitNames, VOL_U } from '../../../math/alg/units'
 import { CalcPage, DataField, DataTable, Examples, NumField, Rules, Seg, SolutionCard, useParam, useSolve } from '../../../math/ui/Calc'
@@ -8,6 +9,18 @@ import type { CalcTool } from '../../../math/tools'
 import '../../../styles/chem-a.css'
 
 type Mode = 'probe' | 'titer' | 'verbrauch'
+
+/** erwartete Probe einer Vorlage (aus ihren Ableseergebnissen, auf zwei Ziffern gerundet): Konzentration bzw. Masse in mg */
+function expectedSample(x: (typeof TITRATIONS)[number]): { c: string; u: string; m: string } {
+  const num = (t: string) => parseFloat(t.replace(',', '.'))
+  const vals = x.readings.split(/[;\s]+/).map(num).filter(Number.isFinite)
+  const mean = vals.reduce((a, b) => a + b, 0) / Math.max(1, vals.length)
+  const n = (num(x.cM) * mean * x.nuP) / (x.nuM * 1000) // mol im vorgelegten Volumen
+  const c = n / (num(x.VP) / 1000)
+  const milli = c < 0.01
+  const fmt = (v: number) => String(Number(v.toPrecision(2))).replace('.', ',')
+  return { c: fmt(milli ? c * 1000 : c), u: milli ? 'mmol/L' : 'mol/L', m: fmt(n * toNum(molarMass(x.formula).M) * 1000) }
+}
 
 const RULES: Record<Mode, [string, string][]> = {
   probe: [
@@ -212,6 +225,15 @@ export default function Titration({ tool }: { tool: CalcTool }) {
       setVku('mL')
       setMe(x.mE ?? '')
       setMeu('g')
+    } else {
+      // Verbrauch vorhersagen: Probe passend zur Vorlage (sonst z. B. 0,1 mol/L Calcium gegen 0,01 mol/L EDTA → 200 mL)
+      const e = expectedSample(x)
+      setCp(e.c)
+      setCpu(e.u)
+      setVp2(x.VP)
+      setVp2u('mL')
+      setMp(e.m)
+      setMpu('mg')
     }
   }
   const reaction = (withSample: boolean) => (
