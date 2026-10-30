@@ -288,6 +288,16 @@ kbd {
   font-weight: 600;
   color: var(--text-2);
   background: var(--surface-2);
+  /* lange Spaltenköpfe brechen um, Zahlen nicht */
+  white-space: normal;
+  vertical-align: bottom;
+}
+
+@media (max-width: 520px) {
+  .calc__table th,
+  .calc__table td {
+    padding: 7px 8px;
+  }
 }
 
 .calc__table tfoot td {

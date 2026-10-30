@@ -3,9 +3,10 @@
  * Verdünnen (c₁V₁ = c₂V₂), Mischungskreuz und Mischtemperatur – jeweils mit Rechenweg.
  * Atommassen wie in der Schule auf zwei Nachkommastellen gerundet.
  */
+import { BY_SYM, ELEMENTS, type Element } from '../../chem/elements'
 import { FormulaError, parseFormula } from '../../chem/formula'
 import { add, approxTex, CalcError, div, isZero, mul, neg, q, qFromRaw, qTex, sign, sub, toNum, type Q } from '../q'
-import { best, CONC_U, eqv, F, fac, MASS_U, MOL_U, nt, T, VOL_U } from './units'
+import { best, CONC_U, eqv, F, fac, MASS_U, MOL_U, nt, T, VOL_U, type Unit } from './units'
 import type { NumIn } from './numinput'
 import type { Solution, Step } from './step'
 
@@ -26,6 +27,17 @@ export function formulaTexOf(src: string) {
   return `\\mathrm{${s.replace(/·/g, '\\cdot ').replace(/([A-Za-z)\]])(\d+)/g, '$1_{$2}')}}`
 }
 
+/**
+ * Atommasse wie in der Schule auf zwei Nachkommastellen, kaufmännisch gerundet – exakt im
+ * Dezimalsystem (toFixed rundet 24,305 wegen der Binärdarstellung falsch auf 24,30 ab).
+ */
+export function schoolMass(el: Element): Q {
+  const x = qFromRaw(String(el.mass))
+  if (el.radio) return x
+  const t = add(mul(x, q(100)), q(1, 2))
+  return q(t.n / t.d, 100)
+}
+
 export function molarMass(src: string): Molar {
   let counts
   try {
@@ -34,16 +46,17 @@ export function molarMass(src: string): Molar {
     if (e instanceof FormulaError) throw new CalcError(e.message)
     throw e
   }
-  const parts = counts.map((c) => ({ sym: c.el.sym, n: c.n, m: qFromRaw(c.el.radio ? String(c.el.mass) : c.el.mass.toFixed(2)) }))
+  const parts = counts.map((c) => ({ sym: c.el.sym, n: c.n, m: schoolMass(c.el) }))
   const M = parts.reduce((s, p) => add(s, mul(q(p.n), p.m)), q(0))
   const sum = parts.map((p) => `${p.n === 1 ? '' : `${p.n} \\cdot `}${m2(p.m)}`).join(' + ')
   const ft = formulaTexOf(src)
+  const single = parts.length === 1 && parts[0].n === 1
   return {
     M,
     formula: ft,
     parts,
     step: {
-      tex: `M(${ft}) = ${sum} = ${m2(M)}${T('g/mol')}`,
+      tex: single ? `M(${ft}) = ${m2(M)}${T('g/mol')}` : `M(${ft}) = ${sum} = ${m2(M)}${T('g/mol')}`,
       note: `Molare Masse: Atommassen aus dem Periodensystem (${parts.map((p) => `${p.sym} $${m2(p.m)}$`).join(', ')}) mal Anzahl der Atome, alles addieren.`,
       head: 'Molare Masse',
     },
@@ -56,6 +69,13 @@ export const m2 = (x: Q) => toNum(x).toFixed(2).replace('.', '{,}')
 /* ---------------------------- Stoffmenge ---------------------------- */
 
 export type Given = 'm' | 'n' | 'N'
+
+/** wie best(), aber winzige Werte (z. B. Masse eines Atoms) in der Grundeinheit mit Zehnerpotenz */
+function bestTiny(x: Q, list: readonly Unit[], base: string) {
+  const b = best(x, list)
+  if (!isZero(x) && Math.abs(toNum(b.v)) < 0.1) return { u: base, v: div(x, fac(list, base)) }
+  return b
+}
 
 export function amount(opts: { formula?: string; M?: NumIn | null; given: Given; value: NumIn | null; unit: string }): Solution {
   const steps: Step[] = []
@@ -91,12 +111,12 @@ export function amount(opts: { formula?: string; M?: NumIn | null; given: Given;
     steps.push({ tex: `n = \\frac{N}{N_A} = \\frac{${nt(x)}}{6{,}022 \\cdot 10^{23}\\,\\text{mol}^{-1}} ${eqv(n)}${T('mol')}`, note: 'Avogadro-Konstante: 1 mol enthält $6{,}022 \\cdot 10^{23}$ Teilchen.', head: 'Stoffmenge' })
   }
   const res: string[] = []
-  const nb = best(n, MOL_U)
+  const nb = bestTiny(n, MOL_U, 'mol')
   res.push(`n ${eqv(nb.v)}${T(nb.u)}`)
   if (opts.given !== 'm' && !isZero(M)) {
     const m = mul(n, M)
     steps.push({ tex: `m = n \\cdot M = ${nt(n)}${T('mol')} \\cdot ${m2(M)}${T('g/mol')} ${eqv(m)}${T('g')}`, note: 'mol kürzt sich weg, übrig bleibt Gramm.', head: 'Masse' })
-    const mb = best(m, MASS_U)
+    const mb = bestTiny(m, MASS_U, 'g')
     if (mb.u !== 'g') steps.push({ tex: `m ${eqv(m)}${T('g')} ${eqv(mb.v)}${T(mb.u)}` })
     res.push(`m ${eqv(mb.v)}${T(mb.u)}`)
   }
@@ -295,3 +315,138 @@ export function mixResult(m1: NumIn | null, x1: NumIn | null, m2: NumIn | null, 
   return { result: `${name}_M ${eqv(r)}${xu}`, steps }
 }
 
+/* ---------------------------- Molare Masse gesucht ---------------------------- */
+
+export interface ElementMatch {
+  sym: string
+  name: string
+  /** Atommasse (Schulwert) */
+  M: Q
+  /** relative Abweichung (M_gemessen − M_Element) / M_Element */
+  dev: number
+  radio: boolean
+}
+
+/** Elemente, deren Atommasse höchstens `tol` (relativ) von M abweicht – nächstes zuerst */
+export function matchElements(M: number, tol = 0.005): ElementMatch[] {
+  return ELEMENTS.map((el) => {
+    const m = schoolMass(el)
+    return { sym: el.sym, name: el.name, M: m, dev: (M - toNum(m)) / toNum(m), radio: el.radio }
+  })
+    .filter((x) => Math.abs(x.dev) <= tol)
+    .sort((a, b) => Math.abs(a.dev) - Math.abs(b.dev))
+}
+
+const pctTex = (x: number) => `${x < 0 ? '-' : '+'}${Math.abs(x * 100).toFixed(2).replace('.', '{,}')}\\,\\%`
+
+/** M = m / n aus Masse und Stoffmenge – und welches Element passt dazu? */
+export function molarFromMass(mIn: NumIn | null, mu: string, nIn: NumIn | null, nu: string): Solution {
+  if (!mIn || !nIn) throw new CalcError('Bitte die Masse m und die Stoffmenge n eingeben.')
+  if (sign(mIn.q) <= 0 || sign(nIn.q) <= 0) throw new CalcError('Masse und Stoffmenge müssen größer als 0 sein.')
+  const steps: Step[] = []
+  steps.push({
+    tex: `m = ${qTex(mIn.q, F)}${T(mu)}, \\quad n = ${qTex(nIn.q, F)}${T(nu)}`,
+    head: 'Gegeben',
+    note: 'Gesucht ist die molare Masse $M$ – an ihr lässt sich der Stoff erkennen.',
+  })
+  const m = mul(mIn.q, fac(MASS_U, mu))
+  const n = mul(nIn.q, fac(MOL_U, nu))
+  const conv: string[] = []
+  if (mu !== 'g') conv.push(`m = ${qTex(mIn.q, F)}${T(mu)} = ${nt(m)}${T('g')}`)
+  if (nu !== 'mol') conv.push(`n = ${qTex(nIn.q, F)}${T(nu)} = ${nt(n)}${T('mol')}`)
+  if (conv.length) steps.push({ tex: conv.join(',\\quad '), head: 'Einheiten umrechnen', note: 'Masse in Gramm und Stoffmenge in mol – dann kommt $M$ in g/mol heraus.' })
+  const M = div(m, n)
+  steps.push({
+    tex: `M = \\frac{m}{n} = \\frac{${nt(m)}${T('g')}}{${nt(n)}${T('mol')}} ${eqv(M, 5)}${T('g/mol')}`,
+    head: 'Molare Masse',
+    note: 'Die Grundformel $n = \\frac{m}{M}$ nach $M$ umgestellt.',
+    final: true,
+  })
+  const Mv = toNum(M)
+  const hits = matchElements(Mv)
+  const extra: string[] = []
+  let remark: string
+  if (hits.length) {
+    hits.slice(0, 3).forEach((h, i) =>
+      steps.push({
+        tex: `M(\\mathrm{${h.sym}}) = ${m2(h.M)}${T('g/mol')} \\quad (\\text{${h.name}${h.radio ? ', radioaktiv' : ''}; Abweichung } ${pctTex(h.dev)})`,
+        head: i === 0 ? 'Vergleich mit dem Periodensystem' : undefined,
+        note: i === 0 ? 'Bei einem Element ist der Zahlenwert der molaren Masse gleich der Atommasse im Periodensystem. Gesucht: Elemente, die höchstens ±0,5 % abweichen – das nächste zuerst.' : undefined,
+      }),
+    )
+    const h = hits[0]
+    extra.push(`\\Rightarrow\\ \\text{${h.name}}\\ (\\mathrm{${h.sym}}),\\ M = ${m2(h.M)}${T('g/mol')}`)
+    remark = `Der Stoff ist vermutlich **${h.name}** ($\\mathrm{${h.sym}}$).${hits.length > 1 ? ` Ebenfalls in der Nähe: ${hits
+      .slice(1, 3)
+      .map((x) => `${x.name} ($${m2(x.M)}$ g/mol)`)
+      .join(', ')}.` : ''}`
+  } else {
+    const near = ELEMENTS.map((el) => ({ el, m: schoolMass(el) })).sort((a, b) => Math.abs(toNum(a.m) - Mv) - Math.abs(toNum(b.m) - Mv))[0]
+    steps.push({
+      tex: `M(\\mathrm{${near.el.sym}}) = ${m2(near.m)}${T('g/mol')} \\quad (\\text{${near.el.name}; Abweichung } ${pctTex((Mv - toNum(near.m)) / toNum(near.m))})`,
+      head: 'Vergleich mit dem Periodensystem',
+      note: 'Kein Element liegt innerhalb von ±0,5 % – am nächsten liegt dieses. Vermutlich ist der Stoff eine Verbindung: Dann hilft eine Summenformel weiter.',
+    })
+    remark = 'Kein Element passt – wahrscheinlich eine Verbindung (oder ein Mess-/Tippfehler).'
+  }
+  return { result: `M ${eqv(M, 5)}${T('g/mol')}`, extra, steps, remark }
+}
+
+/* ---------------------------- Atome eines Elements ---------------------------- */
+
+/** Anzahl der Atome eines Elements in einer Stoffportion: N_Atome = k · n · N_A */
+export function atomsOf(opts: { formula: string; element: string; given: Given; value: NumIn | null; unit: string }): Solution {
+  if (!opts.formula.trim()) throw new CalcError('Bitte eine Summenformel eingeben.')
+  const mm = molarMass(opts.formula)
+  const raw = opts.element.trim()
+  if (!raw) throw new CalcError('Bitte das Element wählen, dessen Atome gezählt werden sollen.')
+  const sym = raw[0].toUpperCase() + raw.slice(1).toLowerCase()
+  if (!BY_SYM[sym]) throw new CalcError(`„${raw}“ ist kein Elementsymbol.`)
+  const part = mm.parts.find((p) => p.sym === sym)
+  if (!part) throw new CalcError(`${BY_SYM[sym].name} (${sym}) kommt in ${opts.formula.trim()} nicht vor.`)
+  if (!opts.value) throw new CalcError('Bitte die Stoffportion (Masse, Stoffmenge oder Teilchenzahl) eingeben.')
+  const x = opts.value.q
+  if (sign(x) <= 0) throw new CalcError('Der Wert muss größer als 0 sein.')
+  const ft = mm.formula
+  const et = `\\mathrm{${sym}}`
+  const steps: Step[] = []
+  let n: Q
+  let N: number
+  if (opts.given === 'm') {
+    steps.push(mm.step)
+    const m = mul(x, fac(MASS_U, opts.unit))
+    if (opts.unit !== 'g') steps.push({ tex: `m = ${qTex(x, F)}${T(opts.unit)} = ${nt(m)}${T('g')}`, head: 'Einheiten umrechnen', note: 'Masse in Gramm.' })
+    n = div(m, mm.M)
+    steps.push({ tex: `n(${ft}) = \\frac{m}{M} = \\frac{${nt(m)}${T('g')}}{${m2(mm.M)}${T('g/mol')}} ${eqv(n)}${T('mol')}`, head: 'Stoffmenge', note: 'Stoffmenge der Verbindung (Formeleinheiten).' })
+  } else if (opts.given === 'n') {
+    n = mul(x, fac(MOL_U, opts.unit))
+    steps.push({ tex: `n(${ft}) = ${qTex(x, F)}${T(opts.unit)}${opts.unit !== 'mol' ? ` = ${nt(n)}${T('mol')}` : ''}`, head: 'Stoffmenge', note: opts.unit !== 'mol' ? 'In mol umrechnen.' : undefined })
+  } else {
+    n = div(x, NA)
+    steps.push({ tex: `N(${ft}) = ${nt(x)}`, head: 'Gegeben', note: 'Anzahl der Formeleinheiten (Moleküle bzw. Ionenpaare).' })
+  }
+  if (opts.given !== 'N') {
+    N = toNum(mul(n, NA))
+    steps.push({
+      tex: `N(${ft}) = n \\cdot N_A = ${nt(n)}${T('mol')} \\cdot 6{,}022 \\cdot 10^{23}\\,\\text{mol}^{-1} \\approx ${approxTex(N, 4)}`,
+      head: 'Teilchenzahl',
+      note: 'So viele Formeleinheiten (Moleküle) sind in der Portion.',
+    })
+  } else N = toNum(x)
+  const k = part.n
+  const Na = k * N
+  steps.push({
+    tex: `N(${et}) = k \\cdot N(${ft}) = ${k} \\cdot ${approxTex(N, 4)} \\approx ${approxTex(Na, 4)}`,
+    head: 'Atome zählen',
+    note: `In jeder Formeleinheit $${ft}$ ${k === 1 ? 'steckt' : 'stecken'} $k = ${k}$ ${sym}-${k === 1 ? 'Atom' : 'Atome'} (Index von ${sym} in der Formel).`,
+    final: true,
+  })
+  const nA = mul(n, q(k))
+  const nb = bestTiny(nA, MOL_U, 'mol')
+  return {
+    result: `N(${et}) \\approx ${approxTex(Na, 4)}`,
+    extra: [`n(${et}) = k \\cdot n ${eqv(nb.v)}${T(nb.u)}`, `N(${ft}) \\approx ${approxTex(N, 4)}`],
+    steps,
+    remark: `$N_{\\text{Atome}} = k \\cdot n \\cdot N_A$ – erst die Formeleinheiten zählen, dann mit dem Index $k$ malnehmen.`,
+  }
+}

@@ -1,6 +1,6 @@
 import { IconArrowRight, IconCalc } from '../components/icons'
 
-export const QUICK_EX = ['2x + 3 = 16 - (2x - 3)', 'x^2 - 4x + 3 = 0', '(2a + 3)^2', '3/4 + 5/6', 'c = n/V', 'H2SO4', '2x + 3y = 12; 4x - y = 10']
+export const QUICK_EX = ['2x + 3 = 16 - (2x - 3)', 'x^2 - 4x + 3 = 0', '(2a + 3)^2', '3/4 + 5/6', 'c = n/V', 'H2SO4', 'Fe + O2 -> Fe2O3', '2x + 3y = 12; 4x - y = 10']
 
 export function QuickHead() {
   return (
