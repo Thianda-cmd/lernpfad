@@ -84,6 +84,10 @@ export interface TubeState {
   drops?: boolean
   ring?: string
   heat?: boolean
+  /** im Wasserbad */
+  bath?: boolean
+  /** Geruch, der aufsteigt (Beschriftung) */
+  smell?: string
 }
 
 function tubePath(cx: number) {
@@ -104,7 +108,7 @@ function particles(seed: number, size: Ppt['size']) {
 }
 
 export function Tube({ cx, state, id, uid }: { cx: number; state: TubeState; id: string; uid: string }) {
-  const { fill, liquid, ppt, pptMode, gas, drops, ring, heat } = state
+  const { fill, liquid, ppt, pptMode, gas, drops, ring, heat, bath, smell } = state
   const pts = useMemo(() => (ppt ? particles(id.length * 97 + cx, ppt.size) : []), [ppt, id, cx])
   const surface = BOTTOM - fill * H
   const clip = `tube-${uid}`
@@ -119,6 +123,14 @@ export function Tube({ cx, state, id, uid }: { cx: number; state: TubeState; id:
           <path d={tubePath(cx) + ' Z'} />
         </clipPath>
       </defs>
+      {bath && (
+        <g className="tube__bath">
+          <path className="tube__bath-water" d={`M${cx - 46} ${BOTTOM - 70} V${BOTTOM + 12} Q${cx - 46} ${BOTTOM + 20} ${cx - 38} ${BOTTOM + 20} H${cx + 38} Q${cx + 46} ${BOTTOM + 20} ${cx + 46} ${BOTTOM + 12} V${BOTTOM - 70} Z`} />
+          {[0, 1, 2, 3, 4].map((k) => (
+            <circle key={k} className="tube__bath-bubble" cx={cx - 36 + k * 18} cy={BOTTOM + 12} r={1.6} style={{ animationDelay: `${k * 0.37}s` }} />
+          ))}
+        </g>
+      )}
       {heat && (
         <g className="tube__heat" transform={`translate(${cx} ${BOTTOM + 6})`}>
           <path d="M0 22 C -9 14 -6 6 0 -2 C 6 6 9 14 0 22 Z" />
@@ -154,6 +166,17 @@ export function Tube({ cx, state, id, uid }: { cx: number; state: TubeState; id:
       </g>
       <path className="tube__glass" d={tubePath(cx)} />
       <path className="tube__lip" d={`M${cx - R - 5} ${TOP} H${cx + R + 5}`} />
+      {bath && <path className="tube__bath-glass" d={`M${cx - 50} ${BOTTOM - 80} V${BOTTOM + 12} Q${cx - 50} ${BOTTOM + 24} ${cx - 38} ${BOTTOM + 24} H${cx + 38} Q${cx + 50} ${BOTTOM + 24} ${cx + 50} ${BOTTOM + 12} V${BOTTOM - 80}`} />}
+      {smell && (
+        <g key={`smell-${uid}`} className="tube__smell">
+          {[-14, 0, 14].map((dx, k) => (
+            <path key={k} d={`M${cx + dx} ${TOP - 6} c -6 -8 6 -14 0 -22 c -6 -8 6 -14 0 -22`} style={{ animationDelay: `${k * 0.45}s` }} />
+          ))}
+          <text x={cx} y={TOP - 58} textAnchor="middle">
+            {smell}
+          </text>
+        </g>
+      )}
       {drops && (
         <g key={`drops-${uid}`} className="tube__pipette">
           <path className="tube__pip" d={`M${cx - 3} 4 h6 v26 l-2 10 h-2 l-2 -10 Z`} />
@@ -184,7 +207,7 @@ export interface DishState {
 
 const GLASS = 'M30 212 Q120 268 210 212'
 
-export function Dish({ state, uid }: { state: DishState; uid: string }) {
+export function Dish({ state, uid, label = 'Uhrglas' }: { state: DishState; uid: string; label?: string }) {
   const { solid, fill, liquid, gas, drops } = state
   const clip = `dish-${uid}`
   const level = 240 - fill * 22
@@ -241,8 +264,166 @@ export function Dish({ state, uid }: { state: DishState; uid: string }) {
         </g>
       )}
       <text className="dish__label" x="120" y="272">
-        Uhrglas
+        {label}
       </text>
+    </g>
+  )
+}
+
+/* ---------------------------------------------------------------------------
+   Tüpfelplatte (weißes Porzellan, 6 Mulden) – Ansicht von oben
+   --------------------------------------------------------------------------- */
+
+export interface Well {
+  label?: string
+  liquid?: string
+  /** Kristall in der Mitte (z. B. FeSO₄) */
+  crystal?: string
+  /** farbiger Ring um den Kristall (Nitrat: braun) */
+  ring?: string
+  /** farbiger Rand am Tropfen (Magnesium mit Titangelb: rot) */
+  rim?: string
+  /** Niederschlag (Flocken) */
+  ppt?: string
+}
+
+export const WELLS: [number, number][] = [
+  [80, 82],
+  [150, 82],
+  [220, 82],
+  [80, 152],
+  [150, 152],
+  [220, 152],
+]
+
+function flecks(seed: number, n: number, rx: number, ry: number) {
+  const rng = mulberry32(seed)
+  return Array.from({ length: n }, () => {
+    const a = rng() * Math.PI * 2
+    const r = Math.sqrt(rng())
+    return { x: Math.cos(a) * r * rx, y: Math.sin(a) * r * ry, r: 0.9 + rng() * 1.5, d: rng() * 0.8 }
+  })
+}
+
+export function SpotPlate({ wells, into = [], uid }: { wells: Well[]; into?: number[]; uid: string }) {
+  const pts = useMemo(() => WELLS.map((_, i) => flecks(31 + i * 7, 16, 15, 12)), [])
+  // Flocken am Rand des Tropfens (Magnesium: roter Rand)
+  const rimPts = useMemo(
+    () =>
+      WELLS.map((_, i) => {
+        const rng = mulberry32(57 + i * 5)
+        return Array.from({ length: 18 }, () => {
+          const a = rng() * Math.PI * 2
+          const k = 0.82 + rng() * 0.2
+          return { x: Math.cos(a) * 17 * k, y: Math.sin(a) * 13.6 * k, r: 0.9 + rng() * 1.3, d: rng() * 0.8 }
+        })
+      }),
+    [],
+  )
+  const grad = `spot-${uid}`
+  return (
+    <svg className="spot" viewBox="0 0 300 232" role="img" aria-label="Tüpfelplatte mit sechs Mulden">
+      <defs>
+        <radialGradient id={`${grad}-well`} cx="42%" cy="38%" r="70%">
+          <stop offset="0%" stopColor="#fdfcf9" />
+          <stop offset="70%" stopColor="#eeebe3" />
+          <stop offset="100%" stopColor="#dedad0" />
+        </radialGradient>
+        <linearGradient id={`${grad}-plate`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#fbfaf6" />
+          <stop offset="100%" stopColor="#eceae3" />
+        </linearGradient>
+      </defs>
+      <rect className="spot__shadow" x="16" y="30" width="268" height="176" rx="28" />
+      <rect className="spot__plate" x="12" y="22" width="276" height="176" rx="28" fill={`url(#${grad}-plate)`} />
+      {WELLS.map(([cx, cy], i) => {
+        const w = wells[i] ?? {}
+        return (
+          <g key={i} className="spot__well">
+            <ellipse className="spot__rim" cx={cx} cy={cy} rx={30} ry={26} />
+            <ellipse cx={cx} cy={cy} rx={24.5} ry={20.5} fill={`url(#${grad}-well)`} className="spot__hollow" />
+            {w.liquid && <ellipse key={`l-${w.liquid}`} className="spot__liquid" cx={cx} cy={cy + 1} rx={19} ry={15.5} style={{ fill: w.liquid }} />}
+            {w.rim && (
+              <g key={`rim-${uid}`} className="spot__rimcol">
+                <ellipse cx={cx} cy={cy + 1} rx={17} ry={13.6} style={{ stroke: w.rim }} />
+                {rimPts[i].map((p, k) => (
+                  <circle key={k} cx={cx + p.x} cy={cy + 1 + p.y} r={p.r} style={{ fill: w.rim, animationDelay: `${0.3 + p.d}s` }} />
+                ))}
+              </g>
+            )}
+            {w.ppt && (
+              <g key={`ppt-${uid}`} className="spot__ppt">
+                {pts[i].map((p, k) => (
+                  <circle key={k} cx={cx + p.x} cy={cy + 1 + p.y} r={p.r} style={{ fill: w.ppt, animationDelay: `${p.d}s` }} />
+                ))}
+              </g>
+            )}
+            {w.crystal && <path className="spot__crystal" d={`M${cx - 6} ${cy - 1} l3 -5 h6 l3 5 l-3 5 h-6 Z`} style={{ fill: w.crystal }} />}
+            {w.ring && <ellipse key={`ring-${uid}`} className="spot__ring" cx={cx} cy={cy - 0.5} rx={10.5} ry={8.6} style={{ stroke: w.ring }} />}
+            {w.liquid && <ellipse className="spot__shine" cx={cx - 7} cy={cy - 5} rx={5} ry={2.4} />}
+            {w.label && (
+              <text className="spot__label" x={cx} y={cy + 37} textAnchor="middle">
+                {w.label}
+              </text>
+            )}
+          </g>
+        )
+      })}
+      {into.length > 0 && (
+        <g key={`drops-${uid}`} className="spot__drops">
+          {into.map((wi, k) => {
+            const [cx, cy] = WELLS[wi]
+            return (
+              <g key={wi} style={{ animationDelay: `${k * 0.55}s` }} className="spot__pip">
+                <path className="tube__pip" d={`M${cx - 2.5} ${cy - 62} h5 v18 l-1.5 7 h-2 l-1.5 -7 Z`} />
+                <rect className="tube__bulb" x={cx - 5} y={cy - 76} width={10} height={16} rx={5} />
+                <ellipse className="spot__drop" cx={cx} cy={cy - 34} rx={2} ry={2.8} style={{ animationDelay: `${0.25 + k * 0.55}s` }} />
+              </g>
+            )
+          })}
+        </g>
+      )}
+    </svg>
+  )
+}
+
+/* ---------------------------------------------------------------------------
+   Gaskammer: zwei Uhrgläser, oben klebt feuchtes Indikatorpapier
+   (gleiches Koordinatensystem wie das Uhrglas)
+   --------------------------------------------------------------------------- */
+
+export interface ChamberState extends DishState {
+  /** oberes Uhrglas aufgelegt */
+  lid?: boolean
+  /** Farbe des Papiers, undefined = kein Papier */
+  paper?: string
+  /** aufsteigendes Gas (Beschriftung, z. B. „NH₃“) */
+  fumes?: string
+}
+
+const LID = 'M30 211 Q120 156 210 211'
+
+export function GasChamber({ state, uid }: { state: ChamberState; uid: string }) {
+  const { lid, paper, fumes } = state
+  return (
+    <g className="chamber">
+      <Dish state={{ ...state, gas: false }} uid={uid} label={lid ? 'Gaskammer' : 'Uhrglas'} />
+      {fumes && state.fill > 0 && (
+        <g key={`fumes-${uid}`} className="chamber__fumes">
+          {[0, 1, 2].map((k) => (
+            <text key={k} x={104 + k * 16} y={232} style={{ animationDelay: `${k * 0.6}s` }}>
+              {fumes}
+            </text>
+          ))}
+        </g>
+      )}
+      {lid && (
+        <g key="lid" className="chamber__lid">
+          {paper && <rect className="chamber__paper" x={97} y={185.5} width={46} height={5.5} rx={1.2} style={{ fill: paper }} />}
+          <path className="dish__glass" d={LID} />
+          <path className="dish__shine" d="M62 203 Q84 192 104 189" />
+        </g>
+      )}
     </g>
   )
 }

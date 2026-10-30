@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { FLAMES, HALIDES, NACHWEISE, type Nachweis, type Step } from '../../chem/nachweise'
-import { Burner, Dish, Eq, Sp, Tube, type DishState, type TubeState } from '../../chem/lab'
+import { Burner, Dish, Eq, GasChamber, Sp, SpotPlate, Tube, type ChamberState, type DishState, type TubeState, type Well } from '../../chem/lab'
 import { Formula } from '../../chem/format'
 import { IconCheck } from '../../components/icons'
 import '../../styles/chem.css'
@@ -24,6 +24,26 @@ function dishAt(steps: Step[], i: number): DishState {
     if (s.solid !== undefined) solid = s.solid
   }
   return { fill, liquid, solid, gas: steps[i].gas, drops: steps[i].drops }
+}
+
+/** Gaskammer nach Schritt i: Uhrglas plus Deckel mit Indikatorpapier */
+function chamberAt(steps: Step[], i: number): ChamberState {
+  let lid = false
+  let paper: string | undefined
+  for (let k = 0; k <= i; k++) {
+    if (steps[k].lid) lid = true
+    if (steps[k].paper) paper = steps[k].paper
+  }
+  return { ...dishAt(steps, i), lid, paper, fumes: steps[i].fumes }
+}
+
+/** Tüpfelplatte nach Schritt i: Änderungen je Mulde zusammenführen */
+function plateAt(steps: Step[], i: number): Well[] {
+  const wells: Well[] = Array.from({ length: 6 }, () => ({}))
+  for (let k = 0; k <= i; k++) {
+    for (const [w, patch] of Object.entries(steps[k].wells ?? {})) wells[Number(w)] = { ...wells[Number(w)], ...patch }
+  }
+  return wells
 }
 
 /** Zustand des Reagenzglases nach Schritt i */
@@ -57,6 +77,8 @@ function tubeAt(steps: Step[], i: number): TubeState {
     drops: cur.drops,
     ring,
     heat: cur.heat,
+    bath: cur.bath,
+    smell: cur.smell,
   }
 }
 
@@ -91,10 +113,10 @@ function Bench({ n }: { n: Nachweis }) {
         <h2>
           <Sp s={n.ion} /> {n.name}-Nachweis
         </h2>
-        <span className={`chip ${n.status === 'praktikum' ? 'chip--green' : 'chip--sand'}`}>{n.status === 'praktikum' ? 'Praktikum' : 'kommt noch'}</span>
+        <span className={`chip ${n.status === 'praktikum' ? 'chip--green' : 'chip--sand'}`}>{n.status === 'praktikum' ? 'Praktikum' : 'kann noch kommen'}</span>
       </header>
 
-      <div className="nw-bench__body">
+      <div className={`nw-bench__body ${n.vessel === 'tuepfel' ? 'nw-bench__body--wide' : ''}`}>
         <div className="nw-scene">
           {flameStep ? (
             <Burner color={step.flame ?? (step.stick ? flame : 'base')} stick={step.stick ?? !!step.reagent} cobalt={step.cobalt} />
@@ -102,6 +124,12 @@ function Bench({ n }: { n: Nachweis }) {
             <svg viewBox="18 112 204 166" role="img" aria-label="Uhrglas">
               <Dish state={dishAt(n.steps, i)} uid={`${n.id}-${i}`} />
             </svg>
+          ) : n.vessel === 'gaskammer' ? (
+            <svg viewBox="18 112 204 166" role="img" aria-label="Gaskammer aus zwei Uhrgläsern">
+              <GasChamber state={chamberAt(n.steps, i)} uid={`${n.id}-${i}`} />
+            </svg>
+          ) : n.vessel === 'tuepfel' ? (
+            <SpotPlate wells={plateAt(n.steps, i)} into={step.into} uid={`${n.id}-${i}`} />
           ) : (
             <svg viewBox="0 -18 240 340" role="img" aria-label="Reagenzglas">
               <Tube cx={120} state={t} id={n.id} uid={`${n.id}-${i}`} />
@@ -186,7 +214,7 @@ function NachweisView() {
       <nav className="nw-list" aria-label="Nachweise">
         {(['praktikum', 'spaeter'] as const).map((st) => (
           <div key={st} className="nw-list__group">
-            <h3>{st === 'praktikum' ? 'Aus dem Praktikum' : 'Kommt noch'}</h3>
+            <h3>{st === 'praktikum' ? 'Aus dem Praktikum' : 'Kann noch kommen'}</h3>
             {(['anion', 'kation'] as const).map((kind) => {
               const items = NACHWEISE.filter((x) => x.status === st && x.kind === kind)
               if (!items.length) return null
@@ -377,7 +405,7 @@ export default function Nachweise() {
         <div>
           <p className="eyebrow">Chemie · Analytik</p>
           <h1>Ionennachweise</h1>
-          <p>Ablauf, Beobachtung und Reaktionsgleichung – Schritt für Schritt.</p>
+          <p>Ablauf, Beobachtung und Reaktionsgleichung – im Reagenzglas, auf der Tüpfelplatte, in der Gaskammer und in der Flamme.</p>
         </div>
         <div className="seg" role="tablist">
           {VIEWS.map((v) => (
