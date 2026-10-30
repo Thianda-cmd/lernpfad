@@ -360,7 +360,7 @@ export const NACHWEISE: Nachweis[] = [
         obs: 'Probe: roter Rand, hellroter Niederschlag (Farblack) – Blindprobe: bleibt gelb-orange',
       },
     ],
-    eq: ['Mg^2+ + 2 OH^- → Mg(OH)2↓{färbt sich mit Titangelb hellrot}'],
+    eq: ['Mg^2+ + 2 OH^- → Mg(OH)2↓{mit Titangelb hellrot}'],
     result: 'roter Rand bzw. hellroter Niederschlag mit Titangelb und Natronlauge – die Blindprobe bleibt gelb-orange',
     swatch: C.lightRed,
     notes: [

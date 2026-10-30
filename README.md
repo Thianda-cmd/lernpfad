@@ -30,7 +30,8 @@ Lösungsweg mit KaTeX gesetzt:
 npm run test:calc
 ```
 
-Alle Reaktionsgleichungen der Ionennachweise auf Atom- und Ladungsbilanz prüfen:
+Alle Reaktionsgleichungen der Ionennachweise auf Atom- und Ladungsbilanz prüfen (dazu Aufbau von Tüpfelplatte und
+Gaskammer):
 
 ```bash
 npm run test:nachweise
@@ -46,12 +47,12 @@ npm run test:chem
 
 | Bereich | Inhalt |
 | --- | --- |
-| Start-Animation | Teilchen auf Millimeterpapier: ein Gas verdichtet sich zum Natrium-Atom (Schalenmodell 2 · 8 · 1), das äußere Elektron löst sich (Na → Na⁺ + e⁻) und zeichnet die Parabel f(x) = x² − 2x − 3 mit Nullstellen und Scheitelpunkt, die Kurve verdrillt sich zur DNA-Doppelhelix, alles zieht sich zur Lernpfad-Zelle zusammen – deren Membran sich öffnet und die Seite freigibt. Hell/dunkel, Klick/Taste überspringt, abschaltbar in den Einstellungen, ruhige Fassung bei „Bewegung reduzieren“ |
+| Start-Animation | Teilchen auf Millimeterpapier: ein Gas verdichtet sich zum Natrium-Atom (Schalenmodell 2 · 8 · 1), das äußere Elektron löst sich (Na → Na⁺ + e⁻) und zeichnet die Parabel f(x) = x² − 2x − 3 mit Nullstellen und Scheitelpunkt, die Kurve verdrillt sich zur DNA-Doppelhelix, alles zieht sich zur Lernpfad-Zelle zusammen – deren Membran sich öffnet und die Seite freigibt. Dauert gut drei Sekunden; hell/dunkel, Klick/Taste überspringt, abschaltbar in den Einstellungen, ruhige Fassung bei „Bewegung reduzieren“ |
 | Übersicht | Schnellrechner (Aufgabe eintippen, der passende Rechner wird erkannt, Ergebnis sofort, Enter öffnet den Lösungsweg), zuletzt benutzte Werkzeuge, alle Werkzeuge nach Fach |
 | Mathematik | neun Rechner mit Schritt-für-Schritt-Lösungsweg wie im Unterricht (Umformung rechts, Erklärung darunter, Probe): **Terme** (Klammern, binomische Formeln, Ausklammern), **Gleichungen & Ungleichungen** (auch mit Brüchen, Parametern, x im Nenner), **p-q-Formel** (mit Parabel, Scheitelpunkt, Linearfaktoren), **Gleichungssysteme** (Additions-, Einsetzungs-, Gleichsetzungsverfahren, Sonderfälle), **Brüche** (Hauptnenner, Doppelbrüche, gemischte Zahlen, Bruchterme), **Potenzen & Wurzeln** (Potenzgesetze, teilweise Wurzelziehen, Zehnerpotenzen), **Formeln umstellen** (Zwiebelprinzip, Werte einsetzen), **Prozent** (Grundwert/Prozentwert/-satz, Änderungen, Massenanteil) und **Geraden** (zwei Punkte, Punkt-Steigung, Lage zweier Geraden). Exakt mit Brüchen gerechnet; Eingaben mit Komma liefern Dezimalzahlen |
 | Chemie → Periodensystem | alle 118 Elemente bildschirmfüllend: Stoffgruppen/Blöcke, Eigenschaften als Farbskala und 3D-Säulen, Aggregatzustand bei jeder Temperatur, Zeitreise der Entdeckungen, Quiz; pro Element Schalenmodell, Orbitalschema und Stoffdaten |
 | Chemie → Rechner | Molare Masse, **Stoffmenge & Lösungen** (m ↔ n ↔ N, Zusammensetzung, Lösung ansetzen, Verdünnen, Mischungskreuz, Mischtemperatur – mit Rechenweg und Einheiten), Ionen & Salzformeln (Überkreuzregel, Namen), Konstanten |
-| Chemie → Ionennachweise | Nachweise aus dem Praktikum (Sulfat, Chlorid, Bromid, Iodid, Carbonat, Natrium, Kalium) und kommende (Ammonium, Eisen(III), Kupfer, Calcium, Nitrat, Phosphat) mit animiertem Reagenzglas, Ionengleichungen mit Ladungen, Halogenid-Vergleich mit NH₃, Flammenfärbung mit Cobaltglas |
+| Chemie → Ionennachweise | Nachweise aus dem Praktikum (Sulfat, Chlorid, Bromid, Iodid, Carbonat, Natrium, Kalium, **Nitrat** als Ringprobe auf der Tüpfelplatte, **Acetat** als Esterprobe im Wasserbad, **Magnesium** mit Essigsäure, Titangelb und Natronlauge auf der Tüpfelplatte mit Blindprobe, **Ammonium** in der Gaskammer ohne Erhitzen) und weitere, die noch kommen können (Nitrit, Acetat mit Eisen(III)-chlorid, Sulfid, Thiosulfat, Eisen(II)/(III), Kupfer, Calcium, Barium, Aluminium, Magnesium als Phosphat, Nickel, Phosphat). Animiertes Reagenzglas, Uhrglas, Gaskammer (zwei Uhrgläser mit Indikatorpapier) und Tüpfelplatte mit sechs Mulden, Ionengleichungen mit Ladungen, Halogenid-Vergleich mit NH₃, Flammenfärbung mit Cobaltglas |
 | Biologie → Zellbiologie | Tier- und Pflanzenzelle als **3D-Modell** und als **Schaubild**, Organellen-Lexikon, Vergleich |
 | Biologie → Zellwand | als Vokabeln: Schichtbild zum Antippen, Mittellamelle / Primärwand / Sekundärwand → Bestandteile → Bausteine (z. B. Pektine aus Galacturonsäure, Rhamnose …), Bausteine mit Summenformel, Ein- und Auflagerungen, Begriffe, Zellwände anderer Lebewesen |
 | Biologie → Zellteilung | Zellzyklus als Ring, **Mitose und Meiose als Animation** (Zeitleiste, Abspielen, Schieberegler), Crossing-over sichtbar, Chromosomenzahl/Chromatiden/DNA-Gehalt je Phase, Vergleich |
