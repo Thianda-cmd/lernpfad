@@ -334,4 +334,16 @@ group('core', () => {
     const ok = Number.isFinite(want) && want !== 0 ? Math.abs(got / want - 1) < 1e-12 : got === want
     if (!ok) fail(`toNum(${l})`, `erwartet ${want}, erhalten ${got}`)
   }
+
+  // Eingaben außerhalb von 10^±100 → freundlicher Fehler statt Infinity/NaN in den Rechnern
+  for (const bad of ['1e400', '-1e309', '1e-400', '10^150', '(10^400)^400', '2^999999999'])
+    expectError(`parseNum(„${bad}“)`, () => parseNum(bad, 'Wert'))
+  for (const good of ['6,022e23', '1,6e-19', '0', '-3', '1e100', '2^300']) {
+    count()
+    try {
+      parseNum(good, 'Wert')
+    } catch (e) {
+      fail(`parseNum(„${good}“)`, (e as Error).message)
+    }
+  }
 })

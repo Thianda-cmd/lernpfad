@@ -25,11 +25,23 @@ function exact(n: Node): Q | null {
       const a = exact(n.a)
       const b = exact(n.b)
       if (!a || !b || !isInt(b)) return null
+      // vor dem Potenzieren abschätzen, sonst rechnet (10^400)^400 ewig
+      if (digits(a) * Math.abs(Number(b.n)) > 4000) throw new CalcError('Die Zahl ist zu groß.')
       return qpow(a, Number(b.n))
     }
     default:
       return null
   }
+}
+
+/** Stellen von Zähler und Nenner zusammen */
+function digits(a: Q) {
+  return (a.n < 0n ? -a.n : a.n).toString().length + a.d.toString().length
+}
+
+/** Zehnerpotenz von |a| (auf ±1 genau, ohne Überlauf) */
+function magnitude(a: Q) {
+  return (a.n < 0n ? -a.n : a.n).toString().length - a.d.toString().length
 }
 
 export interface NumIn {
@@ -38,8 +50,11 @@ export interface NumIn {
   dec: boolean
 }
 
-/** leere Eingabe → null; ungültige → Fehler */
-export function parseNum(s: string, what = 'Wert'): NumIn | null {
+/**
+ * leere Eingabe → null; ungültige → Fehler.
+ * maxExp: größte erlaubte Zehnerpotenz (Laborwerte: 10^±100; Logarithmen dürfen mehr).
+ */
+export function parseNum(s: string, what = 'Wert', maxExp = 100): NumIn | null {
   const t = s.trim().replace(/×/g, '·')
   if (!t) return null
   // gemischte Zahl „1 1/2“
@@ -53,10 +68,19 @@ export function parseNum(s: string, what = 'Wert'): NumIn | null {
   }
   if (/[a-zA-Z]/.test(src.replace(/e[+-]?\d/gi, '').replace(/pi|π/gi, ''))) throw new CalcError(`${what}: Bitte nur eine Zahl eingeben.`)
   const e = exact(node)
-  if (e) return { q: e, dec: /[.,]|e/i.test(t) }
+  if (e) return { q: inRange(e, what, maxExp), dec: /[.,]|e/i.test(t) }
   const v = evaluate(node)
   if (!Number.isFinite(v)) throw new CalcError(`${what}: „${s}“ ist keine Zahl.`)
-  return { q: qFromNumber(v), dec: true }
+  return { q: inRange(qFromNumber(v), what, maxExp), dec: true }
+}
+
+/** Werte jenseits von 10¹⁰⁰ bzw. 10⁻¹⁰⁰ kommen im Labor nicht vor – und sprengen die Gleitkommazahlen */
+function inRange(x: Q, what: string, maxExp: number): Q {
+  if (x.n === 0n) return x
+  const m = magnitude(x)
+  if (m > maxExp) throw new CalcError(`${what}: Die Zahl ist zu groß.`)
+  if (m < -maxExp) throw new CalcError(`${what}: Die Zahl ist zu klein – fast 0.`)
+  return x
 }
 
 /**

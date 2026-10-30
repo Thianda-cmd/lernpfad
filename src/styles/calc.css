@@ -264,15 +264,14 @@ kbd {
   font-variant-numeric: tabular-nums;
 }
 
+/* keine Großbuchstaben: Überschriften enthalten oft Einheiten (mL ≠ ML) */
 .calc__table caption {
   caption-side: top;
   text-align: left;
   padding: 0 0 8px;
-  font-size: 11.5px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-3);
+  font-size: 12.5px;
+  font-weight: 650;
+  color: var(--text-2);
 }
 
 .calc__table th,
@@ -391,6 +390,14 @@ kbd {
   color: var(--text-2);
 }
 
+/* sehr lange Ergebniszeilen (große Zahlen) scrollen auf dem Handy statt abgeschnitten zu werden */
+.calc__res-v,
+.calc__res-x {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
 .calc__remark {
   margin-top: 10px;
   font-size: 13.5px;
@@ -461,12 +468,12 @@ kbd {
   }
 }
 
+/* keine Großbuchstaben: Überschriften wie „pH-Wert“ oder „pKs“ blieben sonst nicht richtig geschrieben */
 .steps__head {
   margin: 10px 0 6px;
-  font-size: 11.5px;
+  font-size: 12.5px;
   font-weight: 650;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
   color: var(--sand-2);
 }
 
