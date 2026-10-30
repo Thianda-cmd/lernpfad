@@ -6,10 +6,11 @@ import { Formula } from '../../chem/format'
 import { IconCheck } from '../../components/icons'
 import '../../styles/chem.css'
 
+/** more: Zusatz, der auf schmalen Bildschirmen wegfällt */
 const VIEWS = [
-  { id: 'nachweise', label: 'Nachweise' },
-  { id: 'halogenide', label: 'Halogenide vergleichen' },
-  { id: 'flamme', label: 'Flammenfärbung' },
+  { id: 'nachweise', label: 'Nachweise', more: '' },
+  { id: 'halogenide', label: 'Halogenide', more: ' vergleichen' },
+  { id: 'flamme', label: 'Flammenfärbung', more: '' },
 ] as const
 
 /** Zustand des Uhrglases nach Schritt i */
@@ -407,10 +408,13 @@ export default function Nachweise() {
           <h1>Ionennachweise</h1>
           <p>Ablauf, Beobachtung und Reaktionsgleichung – im Reagenzglas, auf der Tüpfelplatte, in der Gaskammer und in der Flamme.</p>
         </div>
-        <div className="seg" role="tablist">
+        <div className="seg nw-views" role="tablist">
           {VIEWS.map((v) => (
             <button key={v.id} type="button" role="tab" aria-selected={view === v.id} className={`seg__btn ${view === v.id ? 'is-active' : ''}`} onClick={() => setView(v.id)}>
-              {v.label}
+              <span>
+                {v.label}
+                {v.more && <span className="nw-views__more">{v.more}</span>}
+              </span>
             </button>
           ))}
         </div>

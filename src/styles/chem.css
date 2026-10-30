@@ -1568,9 +1568,13 @@ button.legend__i:hover,
   font-weight: 700;
 }
 
+.mm__table-wrap {
+  margin-top: 14px;
+  overflow-x: auto;
+}
+
 .mm__table {
   width: 100%;
-  margin-top: 14px;
   border-collapse: collapse;
   font-size: 13.5px;
   font-variant-numeric: tabular-nums;
@@ -2774,6 +2778,18 @@ button.legend__i:hover,
   }
   .eqn {
     font-size: 16px;
+  }
+}
+
+/* Ansichtswahl passt auch auf schmale Handys */
+.nw-views {
+  max-width: 100%;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 520px) {
+  .nw-views__more {
+    display: none;
   }
 }
 

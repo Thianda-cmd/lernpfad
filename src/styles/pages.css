@@ -768,6 +768,11 @@ a.cmp-name:hover {
   margin-bottom: 20px;
 }
 
+.lex-filters .seg {
+  max-width: 100%;
+  flex-wrap: wrap;
+}
+
 .select {
   height: 42px;
   padding: 0 36px 0 14px;

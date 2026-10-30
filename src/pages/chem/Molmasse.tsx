@@ -135,30 +135,32 @@ export default function Molmasse() {
                 })}
               </div>
 
-              <table className="mm__table">
-                <thead>
-                  <tr>
-                    <th>Element</th>
-                    <th>Anzahl</th>
-                    <th>Atommasse</th>
-                    <th>Beitrag</th>
-                    <th>Massenanteil</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {res.counts!.map((c) => (
-                    <tr key={c.el.sym}>
-                      <td>
-                        <b>{c.el.sym}</b> <span className="faint">{c.el.name}</span>
-                      </td>
-                      <td>{c.n}</td>
-                      <td>{fmtMass(c.el)} u</td>
-                      <td>{de(c.el.mass * c.n, 3)} g/mol</td>
-                      <td>{pc(((c.el.mass * c.n) / res.M!) * 100, 2)} %</td>
+              <div className="mm__table-wrap">
+                <table className="mm__table">
+                  <thead>
+                    <tr>
+                      <th>Element</th>
+                      <th>Anzahl</th>
+                      <th>Atommasse</th>
+                      <th>Beitrag</th>
+                      <th>Massenanteil</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {res.counts!.map((c) => (
+                      <tr key={c.el.sym}>
+                        <td>
+                          <b>{c.el.sym}</b> <span className="faint">{c.el.name}</span>
+                        </td>
+                        <td>{c.n}</td>
+                        <td>{fmtMass(c.el)} u</td>
+                        <td>{de(c.el.mass * c.n, 3)} g/mol</td>
+                        <td>{pc(((c.el.mass * c.n) / res.M!) * 100, 2)} %</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
               {res.counts!.some((c) => c.el.radio) && <p className="faint mm__note">Enthält Elemente ohne stabile Isotope – dort zählt die Massenzahl.</p>}
             </div>
           )}
