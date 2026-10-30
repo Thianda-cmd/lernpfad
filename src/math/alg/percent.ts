@@ -5,6 +5,7 @@
 import { add, approxTex, CalcError, div, isTerminating, isZero, mul, neg, ONE, q, qTex, sign, sub, toNum, type Q } from '../q'
 import type { NumIn } from './numinput'
 import type { Solution, Step } from './step'
+import { T } from './units'
 
 const F = { dec: true }
 const HUNDRED = q(100)
@@ -23,7 +24,10 @@ const eqv = (x: Q, sig = 4) => {
   return `${s.approx ? '\\approx' : '='} ${s.tex}`
 }
 const tx = (x: Q) => qTex(x, F)
-const unitTex = (u?: string) => (u ? `\\,\\text{${u}}` : '')
+/** freie Einheit als TeX (ohne TeX-Sonderzeichen; µ, °, % wie in units.ts) */
+const unitT = (s = '') => T(s.replace(/[\\{}$_^#&~]/g, '').trim().slice(0, 24))
+/** Einheit für die Grundaufgaben (leer → nichts) */
+const unitTex = (u?: string) => unitT(u)
 
 function need(vals: (NumIn | null)[], k: number, msg: string) {
   if (vals.filter(Boolean).length !== k) throw new CalcError(msg)
@@ -46,7 +50,7 @@ export function percentBasic(G: NumIn | null, W: NumIn | null, p: NumIn | null, 
     steps.push({ tex: `100${PCT} \\;\\widehat{=}\\; ${tx(g)}${u}`, head: 'Mit dem Dreisatz', note: 'Das Ganze sind 100 %.' })
     const one = div(g, HUNDRED)
     steps.push({ tex: `1${PCT} \\;\\widehat{=}\\; ${tx(g)} : 100 ${eqv(one)}${u}`, note: 'Durch 100 teilen.' })
-    steps.push({ tex: `${tx(pp)}${PCT} \\;\\widehat{=}\\; ${show(one).tex} \\cdot ${tx(pp)} ${eqv(w)}${u}`, note: `Mit ${tx(pp).replace('{,}', ',')} malnehmen.` })
+    steps.push({ tex: `${tx(pp)}${PCT} \\;\\widehat{=}\\; ${show(one).tex} \\cdot ${tx(pp)} ${eqv(w)}${u}`, note: `Mit $${tx(pp)}$ malnehmen.` })
     return { result: `W ${eqv(w)}${u}`, steps }
   }
   if (!p) {
@@ -60,8 +64,8 @@ export function percentBasic(G: NumIn | null, W: NumIn | null, p: NumIn | null, 
     steps.push({ tex: `p = \\frac{${tx(w)}}{${tx(g)}} \\cdot 100 ${eqv(r, 6)} \\cdot 100 ${eqv(pp)}${PCT}`, final: true })
     steps.push({ tex: `${tx(g)}${u} \\;\\widehat{=}\\; 100${PCT}`, head: 'Mit dem Dreisatz' })
     const one = div(HUNDRED, g)
-    steps.push({ tex: `1${u} \\;\\widehat{=}\\; 100 : ${tx(g)} ${eqv(one, 6)}${PCT}`, note: `Durch ${tx(g).replace('{,}', ',')} teilen.` })
-    steps.push({ tex: `${tx(w)}${u} \\;\\widehat{=}\\; ${show(one, 6).tex} \\cdot ${tx(w)} ${eqv(pp)}${PCT}`, note: `Mit ${tx(w).replace('{,}', ',')} malnehmen.` })
+    steps.push({ tex: `1${u} \\;\\widehat{=}\\; 100 : ${tx(g)} ${eqv(one, 6)}${PCT}`, note: `Durch $${tx(g)}$ teilen.` })
+    steps.push({ tex: `${tx(w)}${u} \\;\\widehat{=}\\; ${show(one, 6).tex} \\cdot ${tx(w)} ${eqv(pp)}${PCT}`, note: `Mit $${tx(w)}$ malnehmen.` })
     return { result: `p ${eqv(pp)}${PCT}`, steps }
   }
   const w = W.q
@@ -73,7 +77,7 @@ export function percentBasic(G: NumIn | null, W: NumIn | null, p: NumIn | null, 
   steps.push({ tex: `G = \\frac{${tx(w)} \\cdot 100}{${tx(pp)}} = \\frac{${tx(mul(w, HUNDRED))}}{${tx(pp)}} ${eqv(g)}${u}`, final: true })
   steps.push({ tex: `${tx(pp)}${PCT} \\;\\widehat{=}\\; ${tx(w)}${u}`, head: 'Mit dem Dreisatz' })
   const one = div(w, pp)
-  steps.push({ tex: `1${PCT} \\;\\widehat{=}\\; ${tx(w)} : ${tx(pp)} ${eqv(one, 6)}${u}`, note: `Durch ${tx(pp).replace('{,}', ',')} teilen.` })
+  steps.push({ tex: `1${PCT} \\;\\widehat{=}\\; ${tx(w)} : ${tx(pp)} ${eqv(one, 6)}${u}`, note: `Durch $${tx(pp)}$ teilen.` })
   steps.push({ tex: `100${PCT} \\;\\widehat{=}\\; ${show(one, 6).tex} \\cdot 100 ${eqv(g)}${u}`, note: 'Mit 100 malnehmen.' })
   return { result: `G ${eqv(g)}${u}`, steps }
 }
@@ -186,5 +190,85 @@ export function massFraction(w: NumIn | null, mS: NumIn | null, mLM: NumIn | nul
     steps,
     extra: [`m_{\\text{Lösung}} ${eqv(l)}${u}`],
     remark: `Ansetzen: $${show(s).tex}${u}$ Stoff einwiegen und $${show(lm).tex}${u}$ Lösungsmittel dazugeben.`,
+  }
+}
+
+/* ---------------------------- Dreisatz ---------------------------- */
+
+/** prop: je mehr, desto mehr · anti: je mehr, desto weniger */
+export type ThreeKind = 'prop' | 'anti'
+
+/** häufige Mehrzahlformen für den Schluss auf die Einheit: „1 Person“ statt „1 Personen“ */
+const SINGULAR: Record<string, string> = {
+  Personen: 'Person',
+  Tage: 'Tag',
+  Stunden: 'Stunde',
+  Minuten: 'Minute',
+  Sekunden: 'Sekunde',
+  Wochen: 'Woche',
+  Monate: 'Monat',
+  Jahre: 'Jahr',
+  Packungen: 'Packung',
+  Proben: 'Probe',
+  Flaschen: 'Flasche',
+  Platten: 'Platte',
+  Pipetten: 'Pipette',
+  Ansätze: 'Ansatz',
+  Geräte: 'Gerät',
+  Maschinen: 'Maschine',
+  Zellen: 'Zelle',
+  Kolonien: 'Kolonie',
+  Tabletten: 'Tablette',
+  Kisten: 'Kiste',
+  Pumpen: 'Pumpe',
+}
+const singular = (u: string) => SINGULAR[u.trim()] ?? u
+
+/**
+ * Dreisatz: a₁ ≙ b₁ – gesucht ist b₂ zu a₂, über den Schluss auf die Einheit (1 ≙ …).
+ * Proportional: b₂ = b₁ : a₁ · a₂ · antiproportional: b₂ = b₁ · a₁ : a₂
+ */
+export function ruleOfThree(kind: ThreeKind, a1: NumIn | null, b1: NumIn | null, a2: NumIn | null, ua = '', ub = ''): Solution {
+  if (!a1 || !b1 || !a2) throw new CalcError('Bitte die drei bekannten Werte eingeben: $a_1 \\;\\widehat{=}\\; b_1$ und $a_2$.')
+  if (sign(a1.q) <= 0 || sign(b1.q) <= 0 || sign(a2.q) <= 0) throw new CalcError('Beim Dreisatz müssen alle Werte größer als 0 sein.')
+  const A = unitT(ua)
+  const A1 = unitT(singular(ua))
+  const B = unitT(ub)
+  const x1 = a1.q
+  const y1 = b1.q
+  const x2 = a2.q
+  const steps: Step[] = []
+  const prop = kind !== 'anti'
+  steps.push({
+    tex: `${tx(x1)}${A} \\;\\widehat{=}\\; ${tx(y1)}${B}`,
+    head: prop ? 'Zuordnung: proportional' : 'Zuordnung: antiproportional',
+    note: prop ? '**Je mehr, desto mehr** – doppelt so viel ergibt doppelt so viel.' : '**Je mehr, desto weniger** – doppelt so viel ergibt die Hälfte.',
+  })
+  let y2: Q
+  let one: Q
+  if (prop) {
+    one = div(y1, x1)
+    y2 = mul(one, x2)
+    steps.push({ tex: `1${A1} \\;\\widehat{=}\\; ${tx(y1)} : ${tx(x1)} ${eqv(one, 6)}${B}`, head: 'Schluss auf die Einheit', note: `Durch $${tx(x1)}$ teilen – auf beiden Seiten.` })
+    steps.push({ tex: `${tx(x2)}${A} \\;\\widehat{=}\\; ${show(one, 6).tex} \\cdot ${tx(x2)} ${eqv(y2)}${B}`, head: 'Schluss auf die gesuchte Größe', note: `Mit $${tx(x2)}$ malnehmen.`, final: true })
+    steps.push({ tex: `b_2 = \\frac{b_1}{a_1} \\cdot a_2 = \\frac{${tx(y1)}}{${tx(x1)}} \\cdot ${tx(x2)} ${eqv(y2)}${B}`, head: 'In einem Schritt', note: 'Dasselbe als Bruch geschrieben – erst teilen, dann malnehmen.' })
+    const s2 = show(y2)
+    steps.push({ tex: `\\frac{${tx(y1)}}{${tx(x1)}} ${s2.approx ? '\\approx' : '='} \\frac{${s2.tex}}{${tx(x2)}} ${eqv(one, 6)}`, head: 'Probe', note: 'Quotientengleich: Bei proportionalen Größen bleibt das Verhältnis $\\frac{b}{a}$ gleich.' })
+  } else {
+    one = mul(y1, x1)
+    y2 = div(one, x2)
+    steps.push({ tex: `1${A1} \\;\\widehat{=}\\; ${tx(y1)} \\cdot ${tx(x1)} ${eqv(one, 6)}${B}`, head: 'Schluss auf die Einheit', note: `Mit $${tx(x1)}$ malnehmen – bei nur 1 statt $${tx(x1)}$ wird die andere Größe $${tx(x1)}$-mal so groß.` })
+    steps.push({ tex: `${tx(x2)}${A} \\;\\widehat{=}\\; ${show(one, 6).tex} : ${tx(x2)} ${eqv(y2)}${B}`, head: 'Schluss auf die gesuchte Größe', note: `Durch $${tx(x2)}$ teilen.`, final: true })
+    steps.push({ tex: `b_2 = \\frac{b_1 \\cdot a_1}{a_2} = \\frac{${tx(y1)} \\cdot ${tx(x1)}}{${tx(x2)}} ${eqv(y2)}${B}`, head: 'In einem Schritt', note: 'Dasselbe als Bruch geschrieben – erst malnehmen, dann teilen.' })
+    const s2 = show(y2)
+    steps.push({ tex: `${tx(x1)} \\cdot ${tx(y1)} ${s2.approx ? '\\approx' : '='} ${tx(x2)} \\cdot ${s2.tex} ${eqv(one, 6)}`, head: 'Probe', note: 'Produktgleich: Bei antiproportionalen Größen bleibt das Produkt $a \\cdot b$ gleich.' })
+  }
+  return {
+    result: `b_2 ${eqv(y2)}${B}`,
+    extra: [`${tx(x2)}${A} \\;\\widehat{=}\\; ${show(y2).tex}${B}`],
+    steps,
+    remark: prop
+      ? 'Vorher prüfen: Wächst die eine Größe mit der anderen (proportional)? Typisch: Masse und Volumen einer Lösung, Preis und Menge.'
+      : 'Vorher prüfen: Wird die eine Größe kleiner, wenn die andere wächst (antiproportional)? Typisch: Anzahl Personen und Arbeitszeit, Verbrauch pro Tag und Reichweite.',
   }
 }
