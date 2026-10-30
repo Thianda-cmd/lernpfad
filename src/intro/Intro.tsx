@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react'
-import { startIntro, T, type IntroHandle, type Stage } from './engine'
+import { EXIT_MS, FINISH_MS, startIntro, type IntroHandle, type Stage } from './engine'
 import './intro.css'
 
-const EXIT_MS = T.exit
 const EXIT_REDUCED_MS = 350
 
 export const INTRO_KEY = 'lernlabor-intro'
@@ -98,7 +97,7 @@ export default function Intro({ exiting, onFinish, onDone }: { exiting: boolean;
     const onKey = () => finish()
     window.addEventListener('keydown', onKey)
     // falls requestAnimationFrame gedrosselt wird (Tab im Hintergrund)
-    const fallback = window.setTimeout(finish, T.finish + 3000)
+    const fallback = window.setTimeout(finish, FINISH_MS + 3000)
     return () => {
       eng.destroy()
       engine.current = null

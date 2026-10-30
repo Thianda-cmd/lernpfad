@@ -9,19 +9,26 @@ import { LOGO_NUCLEOLUS, LOGO_NUCLEUS, LOGO_VESICLE } from '../components/Logo'
 
 export type Stage = 'start' | 'chem' | 'ion' | 'math' | 'roots' | 'bio' | 'logo'
 
-/** Zeitplan in ms ab dem ersten Bild */
+/**
+ * Zeitplan in „Entwurfs-Millisekunden“ ab dem ersten Bild. Die Uhr läuft SPEED-mal
+ * so schnell – so bleiben alle Abstände stimmig, der ganze Ablauf ist nur kürzer.
+ */
+export const SPEED = 1.6
 export const T = {
-  atom: 100,
-  ion: 1150,
-  math: 1350,
-  bio: 2650,
-  logo: 3700,
-  finish: 5250,
+  atom: 60,
+  ion: 980,
+  math: 1130,
+  bio: 2200,
+  logo: 3150,
+  finish: 4560,
   exit: 850,
 }
+/** echte Dauer bis zum Ausgang bzw. des Ausgangs in ms */
+export const FINISH_MS = Math.round(T.finish / SPEED)
+export const EXIT_MS = Math.round(T.exit / SPEED)
 /** Zeichenstift im Graphen, relativ zu T.math */
-const PEN0 = 260
-const PEN1 = 960
+const PEN0 = 240
+const PEN1 = 840
 const REDUCED_FINISH = 900
 
 const TAU = Math.PI * 2
@@ -560,7 +567,7 @@ function dnaScene(G: Geo): Scene {
   const ct = Math.cos(tilt)
   const stl = Math.sin(tilt)
   sc.update = (t) => {
-    const ph = (t / 1000) * 1.55
+    const ph = (t / 1000) * 1.2
     for (let k = 0; k < N; k++) {
       const f = uu[k]
       const env = smooth(0, 0.09, f) * smooth(1, 0.91, f)
@@ -967,7 +974,7 @@ export function startIntro({ canvas, root, reduced, onStage, onFinish }: IntroOp
     [T.math + 200, 'math'],
     [0, 'roots'],
     [T.bio + 150, 'bio'],
-    [T.logo + 300, 'logo'],
+    [T.logo + 200, 'logo'],
   ]
 
   function init() {
@@ -987,7 +994,7 @@ export function startIntro({ canvas, root, reduced, onStage, onFinish }: IntroOp
     raf = requestAnimationFrame(frame)
     if (!ctx) return
     if (t0 < 0) t0 = now
-    const t = now - t0
+    const t = (now - t0) * SPEED
     lastT = t
     while (evIdx < events.length && t >= events[evIdx][0]) events[evIdx++][1]()
     stages[3][0] = graphRoots()

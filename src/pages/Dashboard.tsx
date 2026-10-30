@@ -1,16 +1,13 @@
-import { useDeferredValue, useMemo, useState, type ComponentType } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Suspense, lazy, type ComponentType } from 'react'
+import { Link } from 'react-router-dom'
 import { ALL_ORGANELLE_IDS } from '../data/organelles'
 import { useProgress } from '../store/progress'
 import { BIO_TOOLS, CHEM_TOOLS, MATH_TOOLS, type CalcTool } from '../math/tools'
-import { detect } from '../math/quick'
-import { CalcError } from '../math/q'
-import { Tex } from '../math/tex'
+import QuickShell from './QuickShell'
 import {
   IconAnimalCell,
   IconArrowRight,
   IconBook,
-  IconCalc,
   IconCompare,
   IconDivide,
   IconFlask,
@@ -21,6 +18,11 @@ import {
   IconWall,
 } from '../components/icons'
 import '../styles/calc.css'
+
+// Rechenkerne und KaTeX erst nachladen (startet sofort, läuft parallel zur Start-Animation)
+const loadQuick = () => import('./QuickCalc')
+loadQuick()
+const QuickCalc = lazy(loadQuick)
 
 function greeting() {
   const h = new Date().getHours()
@@ -37,82 +39,6 @@ interface Tile {
   d: string
   to: string
   icon: IconT
-}
-
-const QUICK_EX = ['2x + 3 = 16 - (2x - 3)', 'x^2 - 4x + 3 = 0', '(2a + 3)^2', '3/4 + 5/6', 'c = n/V', 'H2SO4', '2x + 3y = 12; 4x - y = 10']
-
-function QuickCalc() {
-  const [v, setV] = useState('')
-  const dv = useDeferredValue(v)
-  const nav = useNavigate()
-  const hit = useMemo(() => detect(dv), [dv])
-  const out = useMemo(() => {
-    if (!hit) return null
-    try {
-      const r = hit.run()
-      return r ? { tex: r.result } : null
-    } catch (e) {
-      return { err: e instanceof CalcError ? e.message : 'Noch nicht vollständig.' }
-    }
-  }, [hit])
-  const go = () => {
-    if (hit) nav(hit.to)
-  }
-  return (
-    <section className="quick card" aria-label="Schnellrechner">
-      <div className="quick__head">
-        <span className="quick__icon">
-          <IconCalc size={18} />
-        </span>
-        <div>
-          <h2>Schnellrechner</h2>
-          <p>Aufgabe eintippen – der passende Rechner wird erkannt. Enter öffnet den kompletten Lösungsweg.</p>
-        </div>
-      </div>
-      <form
-        className="quick__form"
-        onSubmit={(e) => {
-          e.preventDefault()
-          go()
-        }}
-      >
-        <input
-          className="quick__input"
-          value={v}
-          onChange={(e) => setV(e.target.value)}
-          placeholder="z. B. 2x + 3 = 7  ·  (a + b)^2  ·  3/4 + 5/6  ·  H2SO4"
-          spellCheck={false}
-          autoComplete="off"
-          aria-label="Aufgabe eingeben"
-        />
-        <button type="submit" className="btn btn--primary quick__go" disabled={!hit}>
-          Lösungsweg <IconArrowRight size={16} />
-        </button>
-      </form>
-      {hit ? (
-        <div className="quick__out" aria-live="polite">
-          <span className="quick__tool">
-            <hit.icon size={15} />
-            {hit.title}
-          </span>
-          {out && 'tex' in out && out.tex && (
-            <span className="quick__res">
-              <Tex>{out.tex}</Tex>
-            </span>
-          )}
-          {out && 'err' in out && <span className="quick__err">{out.err}</span>}
-        </div>
-      ) : (
-        <div className="quick__ex">
-          {QUICK_EX.map((x) => (
-            <button key={x} type="button" className="calc__chip" onClick={() => setV(x)}>
-              {x}
-            </button>
-          ))}
-        </div>
-      )}
-    </section>
-  )
 }
 
 function TileGrid({ items }: { items: Tile[] }) {
@@ -163,7 +89,9 @@ export default function Dashboard() {
         <span className="dash__date">{date}</span>
       </header>
 
-      <QuickCalc />
+      <Suspense fallback={<QuickShell />}>
+        <QuickCalc />
+      </Suspense>
 
       {recent.length > 0 && (
         <nav className="drecent" aria-label="Zuletzt benutzt">

@@ -95,6 +95,8 @@ kbd {
 }
 
 .calc__chip {
+  display: inline-flex;
+  align-items: center;
   height: 28px;
   padding: 0 10px;
   border-radius: 8px;

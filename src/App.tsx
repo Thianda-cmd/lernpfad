@@ -1,11 +1,8 @@
 import { Suspense, lazy, type ReactNode } from 'react'
 import { HashRouter, Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
-
-// Startseite sofort im Hintergrund laden (läuft parallel zur Start-Animation)
-const loadDashboard = () => import('./pages/Dashboard')
-loadDashboard()
-const Dashboard = lazy(loadDashboard)
+// Startseite direkt im Hauptpaket – nur der Schnellrechner wird nachgeladen
+import Dashboard from './pages/Dashboard'
 
 const SubjectPage = lazy(() => import('./pages/SubjectPage'))
 const Zellbiologie = lazy(() => import('./pages/Zellbiologie'))
@@ -38,7 +35,7 @@ export default function App() {
     <HashRouter>
       <Routes>
         <Route element={<Layout />}>
-          <Route index element={<S><Dashboard /></S>} />
+          <Route index element={<Dashboard />} />
           <Route path="biologie" element={<S><SubjectPage id="biologie" /></S>} />
           <Route path="chemie" element={<S><ChemHome /></S>} />
           <Route path="chemie/periodensystem" element={<S><Periodensystem /></S>} />
