@@ -317,4 +317,21 @@ group('core', () => {
     if (!hit.to.startsWith(path)) fail(`Schnellrechner „${src}“`, `erwartet ${path}, erhalten ${hit.to}`)
     run(`Schnellrechner „${src}“`, () => hit.run())
   }
+
+  // toNum mit riesigen Zählern/Nennern: Überlauf → ±Infinity, Unterlauf → 0, Verhältnisse bleiben genau
+  const pow10 = (e: number) => 10n ** BigInt(e)
+  const big: [string, Q, number][] = [
+    ['10^400', q(pow10(400)), Infinity],
+    ['−10^400', q(-pow10(400)), -Infinity],
+    ['10^−400', q(1n, pow10(400)), 0],
+    ['10^400 / 10^399', q(pow10(400), pow10(399)), 10],
+    ['3·10^300 / (7·10^10)', q(3n * pow10(300), 7n * pow10(10)), 3e300 / 7e10],
+    ['10^350 / (3·10^350)', q(pow10(350), 3n * pow10(350)), 1 / 3],
+  ]
+  for (const [l, x, want] of big) {
+    const got = toNum(x)
+    count()
+    const ok = Number.isFinite(want) && want !== 0 ? Math.abs(got / want - 1) < 1e-12 : got === want
+    if (!ok) fail(`toNum(${l})`, `erwartet ${want}, erhalten ${got}`)
+  }
 })
