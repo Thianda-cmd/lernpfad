@@ -9,6 +9,7 @@ import { solveEquation } from './alg/equation'
 import { fractionInput } from './alg/fractions'
 import { solveLgs } from './alg/lgs'
 import { powerInput, sciInput } from './alg/powers'
+import { balanceEquation, looksLikeReaction } from './alg/reaction'
 import { rearrange } from './alg/rearrange'
 import { simplifyInput } from './alg/simplify'
 import type { Solution } from './alg/step'
@@ -50,6 +51,11 @@ export function detect(raw: string): QuickHit | null {
         return { result: m.step.tex, steps: [m.step] }
       },
     }
+  }
+  // Reaktionsgleichung „Fe + O2 -> Fe2O3“ → ausgleichen (vor der Gleichungserkennung, die sonst das „>“ nähme)
+  if (looksLikeReaction(s)) {
+    const t = tool('reaktionen')
+    return { title: t.title, icon: t.icon, to: `${t.path}?gl=${enc(s)}`, run: () => balanceEquation(s) }
   }
   // zwei Gleichungen → Gleichungssystem
   const parts = s.split(/\s*[;|]\s*/).filter(Boolean)

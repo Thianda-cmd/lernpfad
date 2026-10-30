@@ -1568,9 +1568,13 @@ button.legend__i:hover,
   font-weight: 700;
 }
 
+.mm__table-wrap {
+  margin-top: 14px;
+  overflow-x: auto;
+}
+
 .mm__table {
   width: 100%;
-  margin-top: 14px;
   border-collapse: collapse;
   font-size: 13.5px;
   font-variant-numeric: tabular-nums;
@@ -2368,7 +2372,7 @@ button.legend__i:hover,
 
 .nw-item {
   display: grid;
-  grid-template-columns: 54px minmax(0, 1fr) 12px;
+  grid-template-columns: 58px minmax(0, 1fr) 12px;
   align-items: center;
   gap: 8px;
   padding: 7px 10px;
@@ -2398,6 +2402,12 @@ button.legend__i:hover,
 .nw-item__ion {
   font-size: 15px;
   font-weight: 620;
+}
+
+/* lange Formeln wie CH₃COO⁻ */
+.nw-item__ion--long {
+  font-size: 12px;
+  white-space: nowrap;
 }
 
 .nw-item--kation .nw-item__ion {
@@ -2464,6 +2474,10 @@ button.legend__i:hover,
   gap: 22px;
   align-items: center;
   margin-top: 10px;
+}
+
+.nw-bench__body--wide {
+  grid-template-columns: minmax(260px, 380px) minmax(0, 1fr);
 }
 
 .nw-scene svg {
@@ -2765,8 +2779,23 @@ button.legend__i:hover,
     max-width: 220px;
     margin: 0 auto;
   }
+  .nw-bench__body--wide .nw-scene {
+    max-width: 340px;
+  }
   .eqn {
     font-size: 16px;
+  }
+}
+
+/* Ansichtswahl passt auch auf schmale Handys */
+.nw-views {
+  max-width: 100%;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 520px) {
+  .nw-views__more {
+    display: none;
   }
 }
 
@@ -2874,5 +2903,302 @@ button.legend__i:hover,
   .dish * {
     animation: none !important;
     transition: none !important;
+  }
+}
+/* Tüpfelplatte (weißes Porzellan – in beiden Designs hell) */
+.spot {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 320px;
+  overflow: visible;
+}
+
+.spot__shadow {
+  fill: rgba(0, 0, 0, 0.07);
+}
+
+:root[data-theme='dark'] .spot__shadow {
+  fill: rgba(0, 0, 0, 0.4);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .spot__shadow {
+    fill: rgba(0, 0, 0, 0.4);
+  }
+}
+
+.spot__plate {
+  stroke: rgba(30, 30, 25, 0.12);
+  stroke-width: 1.2;
+}
+
+.spot__rim {
+  fill: #f6f4ee;
+  stroke: rgba(30, 30, 25, 0.1);
+  stroke-width: 1;
+}
+
+.spot__hollow {
+  stroke: rgba(30, 30, 25, 0.06);
+  stroke-width: 1;
+}
+
+.spot__liquid {
+  opacity: 0.92;
+  transition: fill 1.1s ease;
+  animation: spot-in 0.45s ease both;
+}
+
+.spot__shine {
+  fill: rgba(255, 255, 255, 0.75);
+  pointer-events: none;
+}
+
+.spot__crystal {
+  stroke: rgba(50, 80, 50, 0.55);
+  stroke-width: 0.8;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: spot-pop 0.45s ease both;
+}
+
+.spot__ring {
+  fill: none;
+  stroke-width: 4.4;
+  opacity: 0.92;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: spot-ring 2.4s ease both;
+}
+
+.spot__rimcol ellipse {
+  fill: none;
+  stroke-width: 3.6;
+  opacity: 0.85;
+  animation: spot-fade 1.8s ease both;
+}
+
+.spot__rimcol circle,
+.spot__ppt circle {
+  opacity: 0;
+  animation: spot-fleck 0.9s ease forwards;
+}
+
+.spot__label {
+  font-size: 11px;
+  font-weight: 550;
+  fill: #5b625c;
+}
+
+.spot__pip {
+  opacity: 0;
+  animation: spot-pip 1.2s ease both;
+}
+
+.spot__drop {
+  fill: rgba(150, 190, 210, 0.9);
+  opacity: 0;
+  animation: spot-drop 0.55s ease-in both;
+}
+
+@keyframes spot-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes spot-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+
+@keyframes spot-ring {
+  0% {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+  40% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0.92;
+    transform: scale(1);
+  }
+}
+
+@keyframes spot-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes spot-fleck {
+  to {
+    opacity: 0.95;
+  }
+}
+
+@keyframes spot-pip {
+  0% {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  20%,
+  70% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes spot-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+}
+
+/* Gaskammer */
+.chamber__lid {
+  animation: chamber-lid 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.chamber__paper {
+  stroke: rgba(0, 0, 0, 0.14);
+  stroke-width: 0.6;
+  transition: fill 2.6s ease;
+}
+
+/* dunkles Papier (Bleisulfid) bleibt auf dunklem Grund sichtbar */
+:root[data-theme='dark'] .chamber__paper {
+  stroke: rgba(255, 255, 255, 0.45);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .chamber__paper {
+    stroke: rgba(255, 255, 255, 0.45);
+  }
+}
+
+.chamber__fumes text {
+  font-size: 9.5px;
+  font-weight: 600;
+  fill: var(--text-3);
+  text-anchor: middle;
+  opacity: 0;
+  animation: chamber-fume 2.4s ease-out infinite;
+}
+
+@keyframes chamber-lid {
+  from {
+    opacity: 0;
+    transform: translateY(-26px);
+  }
+}
+
+@keyframes chamber-fume {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  25% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-36px);
+  }
+}
+
+/* Wasserbad und Geruch am Reagenzglas */
+.tube__bath-water {
+  fill: rgba(120, 170, 210, 0.22);
+}
+
+.tube__bath-glass {
+  fill: none;
+  stroke: var(--text-3);
+  stroke-width: 1.6;
+}
+
+.tube__bath-bubble {
+  fill: none;
+  stroke: var(--text-3);
+  stroke-width: 0.8;
+  opacity: 0;
+  animation: bath-rise 1.8s linear infinite;
+}
+
+.tube__smell path {
+  fill: none;
+  stroke: var(--sand-2);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  opacity: 0;
+  animation: smell-rise 2.4s ease-out infinite;
+}
+
+.tube__smell text {
+  font-size: 13px;
+  font-style: italic;
+  font-weight: 550;
+  fill: var(--sand-2);
+  animation: nw-fade 0.8s ease both;
+}
+
+@keyframes bath-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  20% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-70px);
+  }
+}
+
+@keyframes smell-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  30% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spot *,
+  .chamber * {
+    animation: none !important;
+    transition: none !important;
+  }
+  .spot__rimcol circle,
+  .spot__ppt circle {
+    opacity: 0.95;
+  }
+  .spot__pip,
+  .spot__drop,
+  .chamber__fumes text {
+    opacity: 0;
   }
 }

@@ -58,5 +58,22 @@ for (const nw of NACHWEISE) {
     }
   }
 }
-console.log(`Gleichungen geprüft: ${checked}, Fehler: ${errs.length}`)
+// Aufbau: eindeutige IDs, Mulden 0–5, Gaskammer mit Deckel und Papier
+const ids = new Set<string>()
+const okWell = (i: number) => Number.isInteger(i) && i >= 0 && i <= 5
+for (const nw of NACHWEISE) {
+  if (ids.has(nw.id)) errs.push(`${nw.id}: ID doppelt`)
+  ids.add(nw.id)
+  for (const [k, st] of nw.steps.entries()) {
+    for (const i of Object.keys(st.wells ?? {}).map(Number)) if (!okWell(i)) errs.push(`${nw.id}: Schritt ${k + 1} – Mulde ${i} gibt es nicht`)
+    for (const i of st.into ?? []) if (!okWell(i)) errs.push(`${nw.id}: Schritt ${k + 1} – Tropfen in Mulde ${i}`)
+    if ((st.wells || st.into) && nw.vessel !== 'tuepfel') errs.push(`${nw.id}: Schritt ${k + 1} – Mulden ohne Tüpfelplatte`)
+    if ((st.lid || st.paper) && nw.vessel !== 'gaskammer') errs.push(`${nw.id}: Schritt ${k + 1} – Deckel ohne Gaskammer`)
+  }
+  if (nw.vessel === 'tuepfel' && !nw.steps.some((st) => st.wells)) errs.push(`${nw.id}: Tüpfelplatte ohne Mulden`)
+  if (nw.vessel === 'gaskammer' && !nw.steps.some((st) => st.lid && st.paper)) errs.push(`${nw.id}: Gaskammer ohne Deckel mit Papier`)
+}
+
+console.log(`Gleichungen geprüft: ${checked}, Nachweise: ${NACHWEISE.length}, Fehler: ${errs.length}`)
 for (const e of errs) console.log('  ' + e)
+if (errs.length) process.exit(1)

@@ -95,6 +95,8 @@ kbd {
 }
 
 .calc__chip {
+  display: inline-flex;
+  align-items: center;
   height: 28px;
   padding: 0 10px;
   border-radius: 8px;
@@ -220,6 +222,93 @@ kbd {
   outline: none;
 }
 
+/* Messreihen */
+.df__input {
+  width: 100%;
+  min-height: 92px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line-2);
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  line-height: 1.55;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+.df__input:focus {
+  background: var(--surface);
+  border-color: color-mix(in srgb, var(--green) 55%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--green) 12%, transparent);
+}
+
+.df__hint {
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+/* Ergebnistabelle */
+.calc__table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 4px 0 2px;
+}
+
+.calc__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* keine Großbuchstaben: Überschriften enthalten oft Einheiten (mL ≠ ML) */
+.calc__table caption {
+  caption-side: top;
+  text-align: left;
+  padding: 0 0 8px;
+  font-size: 12.5px;
+  font-weight: 650;
+  color: var(--text-2);
+}
+
+.calc__table th,
+.calc__table td {
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.calc__table th {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+  background: var(--surface-2);
+  /* lange Spaltenköpfe brechen um, Zahlen nicht */
+  white-space: normal;
+  vertical-align: bottom;
+}
+
+@media (max-width: 520px) {
+  .calc__table th,
+  .calc__table td {
+    padding: 7px 8px;
+  }
+}
+
+.calc__table tfoot td {
+  font-weight: 650;
+  border-bottom: 0;
+  border-top: 2px solid var(--line-2);
+}
+
+.calc__table tbody tr:hover td {
+  background: color-mix(in srgb, var(--green) 5%, transparent);
+}
+
 /* Regeln */
 .calc__rules {
   padding: 18px 18px 14px;
@@ -301,6 +390,14 @@ kbd {
   color: var(--text-2);
 }
 
+/* sehr lange Ergebniszeilen (große Zahlen) scrollen auf dem Handy statt abgeschnitten zu werden */
+.calc__res-v,
+.calc__res-x {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
 .calc__remark {
   margin-top: 10px;
   font-size: 13.5px;
@@ -371,12 +468,12 @@ kbd {
   }
 }
 
+/* keine Großbuchstaben: Überschriften wie „pH-Wert“ oder „pKs“ blieben sonst nicht richtig geschrieben */
 .steps__head {
   margin: 10px 0 6px;
-  font-size: 11.5px;
+  font-size: 12.5px;
   font-weight: 650;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
   color: var(--sand-2);
 }
 
@@ -653,6 +750,40 @@ kbd {
   paint-order: stroke;
   stroke: var(--surface);
   stroke-width: 3px;
+}
+
+/* Messwert-Diagramm */
+.dplot .plot {
+  max-width: 560px;
+}
+
+.dplot__tick {
+  font-size: 10px;
+}
+
+.dplot__title {
+  font-size: 11.5px;
+  font-weight: 550;
+  fill: var(--text-2);
+  font-family: var(--font);
+}
+
+.dplot__guide {
+  fill: none;
+  stroke: var(--sand);
+  stroke-width: 1.3;
+  stroke-dasharray: 4 3;
+}
+
+.dplot__sample {
+  fill: var(--sand);
+  stroke: var(--surface);
+  stroke-width: 1.5;
+}
+
+.plot__pt.dplot__muted {
+  stroke: var(--text-3);
+  opacity: 0.6;
 }
 
 /* ---------------------------- Werte einsetzen ---------------------------- */

@@ -1,0 +1,82 @@
+/* ==========================================================================
+   Molekularbiologie-Rechner (PCR-Ansatz): Komponenten als kompakte Tabelle
+   ========================================================================== */
+
+.molbio-comps {
+  display: grid;
+  gap: 8px;
+}
+
+.molbio-comps__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+}
+
+.molbio-comps__head {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.molbio-comps__name {
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 550;
+  color: var(--text-2);
+  overflow-wrap: anywhere;
+}
+
+.molbio-comps__name small {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 450;
+  color: var(--text-3);
+}
+
+.molbio-comps .nf {
+  gap: 0;
+}
+
+.molbio-comps .nf__row {
+  height: 38px;
+}
+
+.molbio-comps .nf__input {
+  padding: 0 8px;
+  font-size: 14px;
+}
+
+.molbio-comps .nf__u {
+  padding: 0 7px;
+  font-size: 12px;
+}
+
+/* nur für Screenreader */
+.molbio-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 460px) {
+  .molbio-comps__row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    row-gap: 4px;
+  }
+  .molbio-comps__name {
+    grid-column: 1 / -1;
+  }
+  .molbio-comps__head > span:first-child {
+    display: none;
+  }
+}

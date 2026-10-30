@@ -76,10 +76,16 @@ export function toNum(a: Q): number {
   const n = Number(a.n)
   const d = Number(a.d)
   if (Number.isFinite(n) && Number.isFinite(d)) return n / d
-  // sehr große Zähler/Nenner: beide gleich weit kürzen, das Verhältnis bleibt
-  const len = Math.max(babs(a.n).toString().length, a.d.toString().length)
-  const s = 10n ** BigInt(len - 300)
-  return Number(a.n / s) / Number(a.d / s || 1n)
+  // sehr große Zähler/Nenner: je die ersten 17 Ziffern nehmen und die Zehnerpotenz getrennt führen –
+  // so wird 10⁴⁰⁰ zu Infinity und 10⁻⁴⁰⁰ zu 0 statt zu einem falschen endlichen Wert
+  const ns = babs(a.n).toString()
+  const ds = a.d.toString()
+  const k = 17
+  const m = Number(ns.slice(0, k)) / Number(ds.slice(0, k))
+  const shift = Math.floor(Math.log10(m))
+  const e = ns.length - Math.min(k, ns.length) - (ds.length - Math.min(k, ds.length)) + shift
+  const v = Number(`${m / 10 ** shift}e${e}`)
+  return a.n < 0n ? -v : v
 }
 
 /** Dezimalzahl (auch „3,25“, „1.5e-3“) exakt als Bruch */

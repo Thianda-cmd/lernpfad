@@ -1,8 +1,12 @@
 import { Link } from 'react-router-dom'
 import { ELEMENTS, position } from '../../chem/elements'
-import { IconArrowRight } from '../../components/icons'
-import { CHEM_CALC } from '../../math/tools'
+import { IconArrowRight, IconFlask } from '../../components/icons'
+import ToolGrid from '../../components/ToolGrid'
+import { CHEM_TOOLS } from '../../math/tools'
+import { useHashScroll } from '../../lib/useHashScroll'
 import '../../styles/chem.css'
+
+const MOLMASSE = { path: '/chemie/molmasse', title: 'Molare Masse', short: 'Formel eingeben, Anteile sehen, zwischen Masse, Stoffmenge und Teilchenzahl umrechnen.', sig: 'M(\\mathrm{H_2O})', icon: IconFlask }
 
 const CONSTANTS: [string, string, string][] = [
   ['Avogadro-Konstante', 'N_A', '6,022 140 76 · 10²³ mol⁻¹'],
@@ -27,6 +31,7 @@ function Sym({ s }: { s: string }) {
 }
 
 export default function ChemHome() {
+  useHashScroll()
   return (
     <div className="page chem-home">
       <header className="page-head">
@@ -54,13 +59,17 @@ export default function ChemHome() {
       </Link>
 
       <section className="section">
+        <div className="section__head">
+          <h2>Nachschlagen</h2>
+        </div>
         <div className="grid grid--2">
-          <Link to="/chemie/molmasse" className="tool card card--link">
+          <Link to="/chemie/nachweise" className="tool card card--link">
             <span className="tool__sig">
-              M(H<sub>2</sub>O) = 18,015 g/mol
+              Ba<sup>2+</sup> + SO<sub>4</sub>
+              <sup>2−</sup> → BaSO<sub>4</sub>↓
             </span>
-            <h3>Molare Masse</h3>
-            <p>Formel eingeben, Anteile sehen, zwischen Masse, Stoffmenge und Teilchenzahl umrechnen.</p>
+            <h3>Ionennachweise</h3>
+            <p>Fällungen, Tüpfelplatte, Gaskammer und Flammenfärbung – Schritt für Schritt mit Gleichung.</p>
           </Link>
           <Link to="/chemie/ionen" className="tool card card--link">
             <span className="tool__sig">
@@ -70,22 +79,14 @@ export default function ChemHome() {
             <h3>Ionen & Salzformeln</h3>
             <p>Formeln und Namen von Salzen bilden – mit Überkreuzregel.</p>
           </Link>
-          <Link to="/chemie/nachweise" className="tool card card--link">
-            <span className="tool__sig">
-              Ba<sup>2+</sup> + SO<sub>4</sub>
-              <sup>2−</sup> → BaSO<sub>4</sub>↓
-            </span>
-            <h3>Ionennachweise</h3>
-            <p>Sulfat, Halogenide, Carbonat, Flammenfärbung – Schritt für Schritt mit Gleichung.</p>
-          </Link>
-          <Link to={CHEM_CALC.path} className="tool card card--link">
-            <span className="tool__sig">
-              n = m / M · c = n / V
-            </span>
-            <h3>{CHEM_CALC.title}</h3>
-            <p>Stoffmenge, Zusammensetzung, Lösungen ansetzen, verdünnen und mischen – mit komplettem Rechenweg.</p>
-          </Link>
         </div>
+      </section>
+
+      <section className="section" id="rechner">
+        <div className="section__head">
+          <h2>Rechner</h2>
+        </div>
+        <ToolGrid items={[MOLMASSE, ...CHEM_TOOLS]} />
       </section>
 
       <section className="section">

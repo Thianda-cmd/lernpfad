@@ -473,3 +473,162 @@ export const IconWall = (p: IconProps) => (
     <path d="M15.5 4.5c1.4 2.5 1.4 5 0 7.5s-1.4 5 0 7.5M19.5 4.5c1.4 2.5 1.4 5 0 7.5s-1.4 5 0 7.5" opacity=".7" />
   </Icon>
 )
+
+/* ---------- Laborrechner ---------- */
+
+/** Becherglas mit Skala (Konzentrationen) */
+export const IconBeaker = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M5.5 4.5h13M6.6 4.5v13.4a2.1 2.1 0 0 0 2.1 2.1h6.6a2.1 2.1 0 0 0 2.1-2.1V4.5" />
+    <path d="M6.6 12.6h10.8" opacity=".55" />
+    <path d="M9.2 7.6h1.8M9.2 10h1.2" />
+  </Icon>
+)
+
+/** Tropfen mit Skala (pH-Wert) */
+export const IconPh = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 3.4c3.2 3.9 5.9 7.2 5.9 10.4a5.9 5.9 0 1 1-11.8 0c0-3.2 2.7-6.5 5.9-10.4Z" />
+    <path d="M9.4 13.8h5.2M10.2 16.6h3.6" opacity=".65" />
+  </Icon>
+)
+
+/** Bürette mit Hahn (Titration) */
+export const IconBurette = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M10.6 2.8h2.8v11.4h-2.8Z" />
+    <path d="M8.8 14.2h6.4M12 14.2v3.2" />
+    <path d="M10.6 5.6h1.2M10.6 8.2h1.2M10.6 10.8h1.2" opacity=".6" />
+    <circle cx="12" cy="20.2" r="1.1" fill="currentColor" stroke="none" />
+  </Icon>
+)
+
+/** Zylinder mit Kolben (Gasgesetze) */
+export const IconGas = (p: IconProps) => (
+  <Icon {...p}>
+    <rect x="5.8" y="8" width="12.4" height="12.2" rx="2" />
+    <path d="M5.8 11.6h12.4M12 11.6V3.6M9.4 3.6h5.2" />
+    <circle cx="9.4" cy="15.6" r=".9" fill="currentColor" stroke="none" />
+    <circle cx="13.6" cy="17.2" r=".9" fill="currentColor" stroke="none" />
+    <circle cx="14.8" cy="14.4" r=".9" fill="currentColor" stroke="none" />
+  </Icon>
+)
+
+/** A + B → (Reaktionsgleichungen) */
+export const IconReaction = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="5.4" cy="12" r="2.4" />
+    <circle cx="10.4" cy="12" r="1.7" />
+    <path d="M13.8 12h6.4M17.8 9.6l2.4 2.4-2.4 2.4" />
+  </Icon>
+)
+
+/** Küvette im Lichtstrahl (Photometrie) */
+export const IconCuvette = (p: IconProps) => (
+  <Icon {...p}>
+    <rect x="9" y="4.6" width="6" height="14.8" rx="1" />
+    <path d="M9 10h6" opacity=".55" />
+    <path d="M2.6 13.4h4.6M5.4 11.6l1.8 1.8-1.8 1.8" />
+    <path d="M17 13.4h4.4" opacity=".5" strokeDasharray="1.6 1.6" />
+  </Icon>
+)
+
+/** Zählkammer-Raster (Zellzahl) */
+export const IconCounting = (p: IconProps) => (
+  <Icon {...p}>
+    <rect x="4" y="4" width="16" height="16" rx="1.6" />
+    <path d="M4 9.33h16M4 14.66h16M9.33 4v16M14.66 4v16" opacity=".5" />
+    <circle cx="6.8" cy="7" r="1" fill="currentColor" stroke="none" />
+    <circle cx="12.2" cy="12.4" r="1" fill="currentColor" stroke="none" />
+    <circle cx="17.4" cy="16.8" r="1" fill="currentColor" stroke="none" />
+    <circle cx="11.2" cy="17.6" r="1" fill="currentColor" stroke="none" />
+  </Icon>
+)
+
+/** Petrischale mit Kolonien (Mikrobiologie) */
+export const IconPetri = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="12" cy="12" r="8.6" />
+    <circle cx="12" cy="12" r="6.8" opacity=".45" />
+    <circle cx="9.4" cy="9.6" r="1.2" fill="currentColor" stroke="none" />
+    <circle cx="14.4" cy="11" r=".9" fill="currentColor" stroke="none" />
+    <circle cx="11.2" cy="14.6" r="1" fill="currentColor" stroke="none" />
+    <circle cx="15.2" cy="15.2" r=".7" fill="currentColor" stroke="none" />
+  </Icon>
+)
+
+/** Mikroskop */
+export const IconMicroscope = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M9.6 3.2 13 5.2 9.2 11.8 5.8 9.8Z" />
+    <path d="M8.2 11.2 7.4 12.6" />
+    <path d="M6 20.4h12M8.6 15.4h6" />
+    <path d="M14.4 20.4a6 6 0 0 0-1.8-9.4" />
+    <path d="M10.4 20.4v-5" />
+  </Icon>
+)
+
+/** Rotor (Zentrifuge) */
+export const IconCentrifuge = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="12" cy="12" r="8.6" />
+    <circle cx="12" cy="12" r="1.3" />
+    <circle cx="12" cy="6.4" r="1.5" />
+    <circle cx="12" cy="17.6" r="1.5" />
+    <circle cx="6.4" cy="12" r="1.5" />
+    <circle cx="17.6" cy="12" r="1.5" />
+  </Icon>
+)
+
+/** Reihe von Röhrchen (Verdünnungsreihe) */
+export const IconDilution = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M4.6 5v12a1.7 1.7 0 0 0 3.4 0V5M10.3 5v12a1.7 1.7 0 0 0 3.4 0V5M16 5v12a1.7 1.7 0 0 0 3.4 0V5" />
+    <path d="M4.6 10h3.4" />
+    <path d="M10.3 12.4h3.4" opacity=".7" />
+    <path d="M16 14.8h3.4" opacity=".45" />
+  </Icon>
+)
+
+/** Doppelhelix (DNA) */
+export const IconDna = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M7.4 3c0 4.6 9.2 4.8 9.2 9s-9.2 4.4-9.2 9" />
+    <path d="M16.6 3c0 4.6-9.2 4.8-9.2 9s9.2 4.4 9.2 9" />
+    <path d="M9 6.2h6M9 17.8h6" opacity=".6" />
+  </Icon>
+)
+
+/** Reaktionsgefäß (PCR-Ansatz) */
+export const IconPcr = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M7.6 4.2h8.8" />
+    <path d="M8.6 4.2v3.4l2 11.2a1.4 1.4 0 0 0 2.8 0l2-11.2V4.2" />
+    <path d="M9 10.4h6" opacity=".55" />
+  </Icon>
+)
+
+/** Glockenkurve (Statistik) */
+export const IconStats = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M3 19.4c3.2 0 4.4-11.4 9-11.4s5.8 11.4 9 11.4" />
+    <path d="M3 19.8h18" opacity=".5" />
+    <path d="M12 8v11.8" opacity=".5" strokeDasharray="1.6 1.6" />
+  </Icon>
+)
+
+/** Logarithmuskurve */
+export const IconLog = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M4 20h16M4 20V4" opacity=".5" />
+    <path d="M5.6 19.2c.8-5.6 3.4-8.6 13.6-10.6" />
+  </Icon>
+)
+
+/** Lineal (Einheiten umrechnen) */
+export const IconRuler = (p: IconProps) => (
+  <Icon {...p}>
+    <rect x="3" y="8" width="18" height="8" rx="1.6" />
+    <path d="M6.6 8v3.2M10.2 8v2M13.8 8v3.2M17.4 8v2" />
+  </Icon>
+)
